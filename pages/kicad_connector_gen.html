@@ -108,7 +108,7 @@
 <body>
 	<div><a href="../index.html">Home</a></div>
 	<h1>Connector symbol generator</h1>
-	<div>Place in left textarea list of pin in format "pin_number pin_name" and click on Generate button, take from right textarea text and past it into necesary *.kicad_sym file. 
+	<div>Place in left textarea list of pin in format "pin_number pin_name [additional info]" and click on Generate button, take from right textarea text and past it into necesary *.kicad_sym file. 
 Place empty stroke in pin list to delimeter pin by group. Each group generate separete unit in symbol.</div>
 	<img src="../images/conn_gen_tips.png" alt="Tips image">
 	<hr>
@@ -130,11 +130,15 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 			<th>Result</th>
 		</tr>
 		<tr>
-			<td><textarea id="pin_list" rows="40" cols="40">1 Pin1
-2 Pin2
+			<td><textarea id="pin_list" rows="40" cols="40">1 GND Ground pin
+2 VCC Power pin
+3 GPIO Digital Input/Output 1
+5 GND Ground pin
 
-3 Pin3
-4 Pin4</textarea></td>
+4 GPIO Digital Input/Output 2
+6 VCC Power pin
+7 AVCC Analog power rail
+8 AGND Analog power rail</textarea></td>
 			<td><list>
 				<ul><input id="is_gnd_concate" type="checkbox">Concate GND pins</ul>
 				<ul><input type="button" value="Generate symbol" onclick="process()"></ul>
