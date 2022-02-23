@@ -56,50 +56,63 @@
 	 *  Main process for build kicad symbol structure
 	 */
 	function process(){
-		const split_regex = /^(\S*)[\t\s]*(.*)$/gm;
 		pins_groups = get_parsed_pins(document.getElementById("pin_list").value);
 		symbl_name = document.getElementById("symbol_name").value;
+		is_gnd_concate = document.getElementById("is_gnd_concate").checked;
 		
 		// Symbol header
 		symbol_text	= `(symbol "${symbl_name}" (pin_numbers hide) (pin_names hide) (in_bom yes) (on_board yes)\r\n`
 		
 		symbol_text	+= symbol_property_gen();
 		
-		// Symbol frame drawer
+		// Unit generation
 		pins_groups.forEach(function(pins, index) {
-			symbol_text += `(symbol "${symbl_name}_${index+1}_0"\r\n`
-			symbol_text += `(rectangle (start -20.32 5.08) (end 10.16 ${y_step*pins.length}) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
+			show_pin_count = 0
+			first_grp_pin = {}
+			/* Text and pins generation */
+			symbol_pins =`(symbol "${symbl_name}_${index+1}_1"\r\n`
 			
-			for (i=0; ; i+=y_step) { 
-				symbol_text += `(polyline (pts(xy -20.32 ${i}) (xy 10.16 ${i})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
-				if(i <= y_step*(pins.length-1))
-					break;
-			}
-		  
-			symbol_text +=`(polyline (pts(xy 0 5.08) (xy 0 ${y_step*pins.length})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none))))\r\n`
-			symbol_text +=`(symbol "${symbl_name}_${index+1}_1"\r\n`
-			
-			symbol_text += "(text \"Цепь\" (at -10.16 2.54 0)(effects (font (size 2.0066 2.0066))))\r\n"
-			if(document.getElementById("symbol_fname").value != null) {
-				symbol_text += `(text "${document.getElementById("symbol_fname").value}" (at -3.81 ${pins.length*y_step+y_init} 0)(effects (font (size 2.0066 2.0066))))\r\n`
-			}
 			// Pin and name field
 			pos_y = y_init
-			pins.forEach(function (item, index) {
-				symbol_text += `(text "${item["index"]}" (at 4.826 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
-				symbol_text += `(text "${item["label"]}" (at -8.89 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`		
+			pins.forEach(function(item) {
+				pin_name = item["label"].toUpperCase()
+				if(is_gnd_concate & /\S*GND\S*/.test(pin_name)) {
+					if(first_grp_pin[pin_name] === undefined) {
+						first_grp_pin[pin_name] = pos_y;
+					}else {
+						temp_y = first_grp_pin[pin_name].toFixed(3)
+						symbol_pins += `(pin passive line (at 15.24 ${temp_y} 180) (length 5.08) hide`
+						symbol_pins += `(name "${item["label"]}" (effects (font (size 1.27 1.27)))) `
+						symbol_pins += `(number "${item["index"]}" (effects (font (size 1.27 1.27)))))\r\n`
+						return;		
+					}
+				}
+				symbol_pins += `(text "${item["index"]}" (at 4.826 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
+				symbol_pins += `(text "${item["label"]}" (at -8.89 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
+				symbol_pins += `(pin passive line (at 15.24 ${pos_y.toFixed(3)} 180) (length 5.08) `
+				symbol_pins += `(name "${item["label"]}" (effects (font (size 1.27 1.27)))) `
+				symbol_pins += `(number "${item["index"]}" (effects (font (size 1.27 1.27)))))\r\n`		
 				pos_y += y_step;
+				show_pin_count++;				
 			});
 			
-			// Pins
-			pos_y = y_init
-			pins.forEach(function (item, index) {
-				symbol_text += `(pin passive line (at 15.24 ${pos_y.toFixed(3)} 180) (length 5.08) `
-				symbol_text += `(name "${item["label"]}" (effects (font (size 1.27 1.27)))) `
-				symbol_text += `(number "${item["index"]}" (effects (font (size 1.27 1.27)))))\r\n`
-				pos_y += y_step;
-			});
-			symbol_text += ")\r\n";
+			symbol_pins += "(text \"Цепь\" (at -10.16 2.54 0)(effects (font (size 2.0066 2.0066))))\r\n"
+			if(document.getElementById("symbol_fname").value != null) {
+				symbol_pins += `(text "${document.getElementById("symbol_fname").value}" (at -3.81 ${show_pin_count*y_step+y_init} 0)(effects (font (size 2.0066 2.0066))))\r\n`
+			}
+			
+			/* Lines generation */
+			symbol_lines = `(symbol "${symbl_name}_${index+1}_0"\r\n`
+			symbol_lines += `(rectangle (start -20.32 5.08) (end 10.16 ${y_step*show_pin_count}) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
+			
+			for (i=0; ; i+=y_step) { 
+				symbol_lines += `(polyline (pts(xy -20.32 ${i}) (xy 10.16 ${i})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
+				if(i <= y_step*(show_pin_count-1))
+					break;
+			}
+			symbol_lines +=`(polyline (pts(xy 0 5.08) (xy 0 ${y_step*show_pin_count})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none))))\r\n`
+			
+			symbol_text += symbol_lines + symbol_pins + ")\r\n";
 		});
 		document.getElementById("output").value = symbol_text + ")";
 	};
@@ -136,6 +149,7 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 5 GND Ground pin
 
 4 GPIO Digital Input/Output 2
+10 AGND Analog power rail
 6 VCC Power pin
 7 AVCC Analog power rail
 8 AGND Analog power rail</textarea></td>
