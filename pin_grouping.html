@@ -1,0 +1,34 @@
+<script>
+	/*!
+	 *  Main process for build kicad symbol structure
+	 */
+	function process(){
+		
+	};
+</script>
+
+<body>
+	<h1>Tools for split pin list by group</h1>
+	<div>Place in left textarea list of pin in format "pin_number pin_name pin_description" and click on Sort button, take from right textarea sorted by group, that can be used to past into *.kicad_sym generation page. </div>
+	<hr>
+	<div><table>
+		<tr>
+			<th>Pin list</th>
+			<th>Result</th>
+		</tr>
+		<tr>
+			<td><textarea id="pin_list" rows="40" cols="40">1 GND 
+2 VCC
+3 GPIO
+4 GPIO
+5 GND
+6 VCC
+7 AVCC
+8 AVDD</textarea></td>
+			<td><textarea id="output" rows="40" cols="80" readonly></textarea></td>
+		</tr>
+	</table></div>
+	<div>
+		<input type="button" value="Sort" onclick="process()">
+	</div>
+</body>
