@@ -124,7 +124,8 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 	</table></div>
 	<div><table>
 		<tr>
-			<th>Input pin list for <input type="button" value="generate symbol" onclick="process()"></th>
+			<th>Input pin list</th>
+			<th>Option</th>
 			<th>Result</th>
 		</tr>
 		<tr>
@@ -133,6 +134,10 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 
 3 Pin3
 4 Pin4</textarea></td>
+			<td><list>
+				<ul><input id="is_gnd_concate" type="checkbox">Concate GND pins</ul>
+				<ul><input type="button" value="Generate symbol" onclick="process()"></ul>
+			</list></td>
 			<td><textarea id="output" rows="40" cols="80" readonly></textarea></td>
 		</tr>
 	</table></div>
