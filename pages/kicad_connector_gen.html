@@ -7,7 +7,7 @@
 	 * label - pin name
 	 */
 	function get_parsed_pins(raw_list){
-		const split_regex = new RegExp('^(\\S+)\[\\t\\s\]+(\\S+)$');
+		const split_regex = new RegExp('^(\\S+)\[\\t\\s\]+(\\S+).*?$');
 		sort_list = []
 		sub_list = []
 		lines = raw_list.split("\n")
