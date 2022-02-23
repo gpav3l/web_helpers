@@ -1,6 +1,7 @@
 <script>
 	const y_init = -2.54
 	const y_step = -5.08
+	
 	/*! From raw text parse and return array of dictionary with keys: 
 	 * index - pin number, 
 	 * label - pin name
@@ -8,9 +9,12 @@
 	function get_parsed_pins(raw_list){
 		const split_regex = new RegExp('^(\\S+)\[\\t\\s\]+(\\S+)$');
 		sort_list = []
-		pins = raw_list.split("\n")
+		lines = raw_list.split("\n")
 		
-		pins.forEach(function (item, index) {
+		lines.forEach(function (item, index) {
+			if(item == "") {
+				alert("Empty string")
+			}
 			if (item.match(split_regex) != null) {
 				temp = split_regex.exec(item)
 				sort_list.push({"index":temp[1], "label":temp[2]})
@@ -24,8 +28,8 @@
 	*  Generate symbol property
 	*/
 	function symbol_property_gen(pins_count) {
-		sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: 2.54, pos_y: 7.62, font: 2},
-		{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: -3.81, pos_y: pins_count*y_step+y_init, font: 2},
+		sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -19.05, pos_y: -7.62, font: 2},
+		{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: -2.54, pos_y: -7.62, font: 2},
 		{prop: "Footprint", value: "", pos_x: 20.32, pos_y: 7.62, font: 2},
 		{prop: "Datasheet", value: document.getElementById("symbol_ds").value, pos_x: -2.54, pos_y: 21.59, font: 1.27},
 		{prop: "ki_locked", value: "", pos_x: 0, pos_y: 0, font: 1.27},
@@ -71,7 +75,7 @@
 		
 		symbol_text += "(text \"Цепь\" (at -10.16 2.54 0)(effects (font (size 2.0066 2.0066))))\r\n"
 		if(document.getElementById("symbol_fname").value != null) {
-			symbol_text += `(text \"${document.getElementById("symbol_fname").value}\" (at -15.24 7.62 0)(effects (font (size 2.0066 2.0066))))\r\n`
+			symbol_text += `(text "${document.getElementById("symbol_fname").value}" (at -3.81 ${pins_count*y_step+y_init} 0)(effects (font (size 2.0066 2.0066))))\r\n`
 		}
 		// Pin and name field
 		pos_y = y_init
@@ -103,9 +107,9 @@
 		<tr>
 			<th>Symbol name</th><td><input id="symbol_name" type="text" value="Connector"></td>
 			<th>Reference</th><td><input id="symbol_ref" type="text" value="XP"></td>
-			<th>Description</th><td><input id="symbol_desc" type="text" value="Desc"></td>
+			<th>Description</th><td><input id="symbol_desc" type="text" value=""></td>
 			<th>Datasheet</th><td><input id="symbol_ds" type="text"></td>
-			<th>Functional name</th><td><input id="symbol_fname" type="text" value="fname"></td>	
+			<th>Functional name</th><td><input id="symbol_fname" type="text" value=""></td>	
 		</tr>
 	</table> </div>
 	<div><table>
