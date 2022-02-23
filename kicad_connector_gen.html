@@ -9,17 +9,22 @@
 	function get_parsed_pins(raw_list){
 		const split_regex = new RegExp('^(\\S+)\[\\t\\s\]+(\\S+)$');
 		sort_list = []
+		sub_list = []
 		lines = raw_list.split("\n")
 		
 		lines.forEach(function (item, index) {
 			if(item == "") {
-				alert("Empty string")
-			}
-			if (item.match(split_regex) != null) {
-				temp = split_regex.exec(item)
-				sort_list.push({"index":temp[1], "label":temp[2]})
+				if(sub_list.length != 0) sort_list.push(sub_list);
+				sub_list = []
+			} else {
+				if (item.match(split_regex) != null) {
+					temp = split_regex.exec(item)
+					sub_list.push({"index":temp[1], "label":temp[2]})
+				}
 			}
 		});
+		
+		if(sub_list.length != 0) sort_list.push(sub_list);
 		
 		return sort_list;
 	};
@@ -27,9 +32,9 @@
 	/*!
 	*  Generate symbol property
 	*/
-	function symbol_property_gen(pins_count) {
-		sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -19.05, pos_y: -7.62, font: 2},
-		{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: -2.54, pos_y: -7.62, font: 2},
+	function symbol_property_gen() {
+		sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -19.05, pos_y: 7.62, font: 2},
+		{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: -2.54, pos_y: 7.62, font: 2},
 		{prop: "Footprint", value: "", pos_x: 20.32, pos_y: 7.62, font: 2},
 		{prop: "Datasheet", value: document.getElementById("symbol_ds").value, pos_x: -2.54, pos_y: 21.59, font: 1.27},
 		{prop: "ki_locked", value: "", pos_x: 0, pos_y: 0, font: 1.27},
@@ -52,73 +57,78 @@
 	 */
 	function process(){
 		const split_regex = /^(\S*)[\t\s]*(.*)$/gm;
-		pins = get_parsed_pins(document.getElementById("pin_list").value);
+		pins_groups = get_parsed_pins(document.getElementById("pin_list").value);
 		symbl_name = document.getElementById("symbol_name").value;
 		
 		// Symbol header
 		symbol_text	= `(symbol "${symbl_name}" (pin_numbers hide) (pin_names hide) (in_bom yes) (on_board yes)\r\n`
 		
-		symbol_text	+= symbol_property_gen(pins.length);
+		symbol_text	+= symbol_property_gen();
 		
 		// Symbol frame drawer
-		symbol_text += `(symbol "${symbl_name}_1_0"\r\n`
-        symbol_text += `(rectangle (start -20.32 5.08) (end 10.16 ${y_step*pins.length}) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
-        
-        for (i=0; ; i+=y_step) { 
-			symbol_text += `(polyline (pts(xy -20.32 ${i}) (xy 10.16 ${i})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
-			if(i <= y_step*(pins.length-1))
-				break;
-        }
-      
-        symbol_text +=`(polyline (pts(xy 0 5.08) (xy 0 ${y_step*pins.length})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none))))\r\n`
-		symbol_text +=`(symbol "${symbl_name}_1_1"\r\n`
-		
-		symbol_text += "(text \"Цепь\" (at -10.16 2.54 0)(effects (font (size 2.0066 2.0066))))\r\n"
-		if(document.getElementById("symbol_fname").value != null) {
-			symbol_text += `(text "${document.getElementById("symbol_fname").value}" (at -3.81 ${pins_count*y_step+y_init} 0)(effects (font (size 2.0066 2.0066))))\r\n`
-		}
-		// Pin and name field
-		pos_y = y_init
-		pins.forEach(function (item, index) {
-			symbol_text += `(text "${item["index"]}" (at 4.826 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
-			symbol_text += `(text "${item["label"]}" (at -8.89 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`		
-			pos_y += y_step;
+		pins_groups.forEach(function(pins, index) {
+			symbol_text += `(symbol "${symbl_name}_${index+1}_0"\r\n`
+			symbol_text += `(rectangle (start -20.32 5.08) (end 10.16 ${y_step*pins.length}) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
+			
+			for (i=0; ; i+=y_step) { 
+				symbol_text += `(polyline (pts(xy -20.32 ${i}) (xy 10.16 ${i})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
+				if(i <= y_step*(pins.length-1))
+					break;
+			}
+		  
+			symbol_text +=`(polyline (pts(xy 0 5.08) (xy 0 ${y_step*pins.length})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none))))\r\n`
+			symbol_text +=`(symbol "${symbl_name}_${index+1}_1"\r\n`
+			
+			symbol_text += "(text \"Цепь\" (at -10.16 2.54 0)(effects (font (size 2.0066 2.0066))))\r\n"
+			if(document.getElementById("symbol_fname").value != null) {
+				symbol_text += `(text "${document.getElementById("symbol_fname").value}" (at -3.81 ${pins.length*y_step+y_init} 0)(effects (font (size 2.0066 2.0066))))\r\n`
+			}
+			// Pin and name field
+			pos_y = y_init
+			pins.forEach(function (item, index) {
+				symbol_text += `(text "${item["index"]}" (at 4.826 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
+				symbol_text += `(text "${item["label"]}" (at -8.89 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`		
+				pos_y += y_step;
+			});
+			
+			// Pins
+			pos_y = y_init
+			pins.forEach(function (item, index) {
+				symbol_text += `(pin passive line (at 15.24 ${pos_y.toFixed(3)} 180) (length 5.08) `
+				symbol_text += `(name "${item["label"]}" (effects (font (size 1.27 1.27)))) `
+				symbol_text += `(number "${item["index"]}" (effects (font (size 1.27 1.27)))))\r\n`
+				pos_y += y_step;
+			});
+			symbol_text += ")\r\n";
 		});
-		
-		// Pins
-		pos_y = y_init
-		pins.forEach(function (item, index) {
-			symbol_text += `(pin passive line (at 15.24 ${pos_y.toFixed(3)} 180) (length 5.08) `
-			symbol_text += `(name "${item["label"]}" (effects (font (size 1.27 1.27)))) `
-			symbol_text += `(number "${item["index"]}" (effects (font (size 1.27 1.27)))))\r\n`
-			pos_y += y_step;
-		});
-		
-		document.getElementById("output").value = symbol_text + "))";
+		document.getElementById("output").value = symbol_text + ")";
 	};
 </script>
 
 <body>
 	<h1>Connector symbol generator</h1>
-	<div>Place in left textarea list of pin in format "pin_number pin_name" and click on Generate button, take from right textarea text and past it to necesary *.kicad_sym file</div>
+	<div>Place in left textarea list of pin in format "pin_number pin_name" and click on Generate button, take from right textarea text and past it into necesary *.kicad_sym file. 
+Place empty stroke in pin list to delimeter pin by group. Each group generate separete unit in symbol.</div>
 	<img src="./images/conn_gen_tips.png" alt="Tips image">
 	<hr>
 	<div><table>
 		<tr>
+			<th>Reference</th><td><input id="symbol_ref" type="text" value="XP" width="3" size="3"></td>
 			<th>Symbol name</th><td><input id="symbol_name" type="text" value="Connector"></td>
-			<th>Reference</th><td><input id="symbol_ref" type="text" value="XP"></td>
-			<th>Description</th><td><input id="symbol_desc" type="text" value=""></td>
-			<th>Datasheet</th><td><input id="symbol_ds" type="text"></td>
 			<th>Functional name</th><td><input id="symbol_fname" type="text" value=""></td>	
 		</tr>
 	</table> </div>
+	<div><table>
+		<tr><th>Description</th><td><input id="symbol_desc" type="text" value="" size="90"></td></tr>	
+		<tr><th>Datasheet</th><td><input id="symbol_ds" type="text" size="90"></td></tr>
+	</table></div>
 	<div><table>
 		<tr>
 			<th>Pin list</th>
 			<th>Result</th>
 		</tr>
 		<tr>
-			<td><textarea id="pin_list" rows="40" cols="80">1 Pin1
+			<td><textarea id="pin_list" rows="40" cols="40">1 Pin1
 2 Pin2
 
 3 Pin3
