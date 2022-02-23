@@ -101,13 +101,13 @@
 			});
 			symbol_text += ")\r\n";
 		});
-		document.getElementById("output").value = symbol_text + ")";
+		//document.getElementById("output").value = symbol_text + ")";
 	};
 </script>
 
 <body>
 	<div><a href="../index.html">Home</a></div>
-	<h1>Connector symbol generator</h1>
+	<h1>IC symbol generator</h1>
 	<div>Place in left textarea list of pin in format "pin_number pin_name [additional info]" and click on Generate button, take from right textarea text and past it into necesary *.kicad_sym file. 
 Place empty stroke in pin list to delimeter pin by group. Each group generate separete unit in symbol.</div>
 	<img src="../images/conn_gen_tips.png" alt="Tips image">
@@ -147,3 +147,69 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 		</tr>
 	</table></div>
 </body>
+
+
+
+(symbol "IC" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)
+    (property "Reference" "DA" (id 0) (at -11.43 12.7 0)
+      (effects (font (size 2.0066 2.0066)))
+    )
+    (property "Value" "IC" (id 1) (at 3.81 12.7 0)
+      (effects (font (size 2.0066 2.0066)))
+    )
+    (property "Footprint" "" (id 2) (at 0 21.59 0)
+      (effects (font (size 2.0066 2.0066)) hide)
+    )
+    (property "Datasheet" "http://milandr.ru/uploads/Products/product_173/spec_1309ER1T.pdf" (id 3) (at 2.54 17.78 0)
+      (effects (font (size 2.0066 2.0066)) hide)
+    )
+    (symbol "IC_0_0"
+      (polyline
+        (pts
+          (xy 5.08 10.16)
+          (xy 5.08 -10.16)
+        )
+        (stroke (width 0) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+      (text "*STU" (at 0 5.08 0)
+        (effects (font (size 2.0066 2.0066)))
+      )
+    )
+    (symbol "IC_0_1"
+      (rectangle (start -12.7 10.16) (end 12.7 -10.16)
+        (stroke (width 0) (type default) (color 0 0 0 0))
+        (fill (type background))
+      )
+      (polyline
+        (pts
+          (xy -5.08 10.16)
+          (xy -5.08 -10.16)
+        )
+        (stroke (width 0) (type default) (color 0 0 0 0))
+        (fill (type none))
+      )
+    )
+    (symbol "IC_1_1"
+      (pin input line (at -17.78 0 0) (length 5.08)
+        (name "EN" (effects (font (size 2.0066 2.0066))))
+        (number "13" (effects (font (size 2.0066 2.0066))))
+      )
+      (pin power_in line (at -17.78 5.08 0) (length 5.08)
+        (name "Ui" (effects (font (size 2.0066 2.0066))))
+        (number "15" (effects (font (size 2.0066 2.0066))))
+      )
+      (pin power_out line (at 17.78 5.08 180) (length 5.08)
+        (name "Uo" (effects (font (size 2.0066 2.0066))))
+        (number "4" (effects (font (size 2.0066 2.0066))))
+      )
+      (pin input line (at 17.78 0 180) (length 5.08)
+        (name "FB" (effects (font (size 2.0066 2.0066))))
+        (number "6" (effects (font (size 2.0066 2.0066))))
+      )
+      (pin power_in line (at -17.78 -5.08 0) (length 5.08)
+        (name "GND" (effects (font (size 2.0066 2.0066))))
+        (number "8" (effects (font (size 2.0066 2.0066))))
+      )
+    )
+  )
