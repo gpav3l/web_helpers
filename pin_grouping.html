@@ -1,4 +1,38 @@
 <script>
+	function dispFile(contents) {
+	  document.getElementById('pin_list').innerHTML=contents
+	}
+	
+	function clickElem(elem) {
+		var eventMouse = document.createEvent("MouseEvents")
+		eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+		elem.dispatchEvent(eventMouse)
+	}
+	
+	function openFile(func) {
+		readFile = function(e) {
+			var file = e.target.files[0];
+			if (!file) {
+				return;
+			}
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				var contents = e.target.result;
+				fileInput.func(contents)
+				document.body.removeChild(fileInput)
+			}
+			reader.readAsText(file)
+		}
+		fileInput = document.createElement("input")
+		fileInput.type='file'
+		fileInput.accept='.txt'
+		fileInput.style.display='none'
+		fileInput.onchange=readFile
+		fileInput.func=func
+		document.body.appendChild(fileInput)
+		clickElem(fileInput)
+	}
+
 	/*!
 	 *  Main process for build kicad symbol structure
 	 */
@@ -13,22 +47,19 @@
 	<hr>
 	<div><table>
 		<tr>
-			<th>Pin list</th>
+			<th>Type pin list or <button onclick="openFile(dispFile)">open a file</button> for <input type="button" value="Sort" onclick="process()"></th>
 			<th>Result</th>
 		</tr>
 		<tr>
-			<td><textarea id="pin_list" rows="40" cols="40">1 GND 
-2 VCC
-3 GPIO
-4 GPIO
-5 GND
-6 VCC
-7 AVCC
-8 AVDD</textarea></td>
+			<td><textarea id="pin_list" rows="40" cols="40">1 GND Ground pin
+2 VCC Power pin
+3 GPIO Digital Input/Output
+5 GND Ground pin
+4 GPIO Digital Input/Output
+6 VCC Power pin
+7 AVCC Analog power rail
+8 AGND Analog power rail</textarea></td>
 			<td><textarea id="output" rows="40" cols="80" readonly></textarea></td>
 		</tr>
 	</table></div>
-	<div>
-		<input type="button" value="Sort" onclick="process()">
-	</div>
 </body>
