@@ -56,21 +56,6 @@
 
 		<!-- Left Column -->
 		<div class="col-sm-3">
-			<div class="panel panel-default">
-				
-				<div class="panel-heading">
-					<h1 class="panel-title"><span class="glyphicon glyphicon-random"></span> Options</h1>
-				</div>
-				<div class="list-group">
-					<list>
-					<ul><input id="sort_by_info" type="radio" name="sort_type" checked="checked">Sort by pin info</ul>
-					<ul><input id="sort_by_name" type="radio" name="sort_type">Sort by pin name</ul>
-					</list>
-				</div>
-				<div class="panel-heading">
-					<button onclick="process()">Sort pins</button>
-				</div>
-			</div>
 		</div><!--/Left Column-->
   
   
@@ -104,6 +89,24 @@
 		</tr>
 	</table>
 			</div>
+		
+		<div class="row">
+		<div class="panel panel-default">
+				<div class="panel-heading">
+					<h1 class="panel-title"><span class="glyphicon glyphicon-random"></span> Options</h1>
+				</div>
+				<div class="list-group">
+					<list>
+					<ul><input id="sort_by_info" type="radio" name="sort_type" checked="checked">Sort by pin info</ul>
+					<ul><input id="sort_by_name" type="radio" name="sort_type">Sort by pin name</ul>
+					</list>
+				</div>
+				<div class="panel-heading">
+					<button onclick="process()">Sort pins</button>
+					<button onclick="save_file()">Save file</button>
+				</div>
+			</div>
+		</div>
 			
 		</div><!--/Center Column-->
 
@@ -239,6 +242,20 @@
 			res_output = sort_by_name(list);				
 		
 		document.getElementById("output").value = res_output;
+	};
+	
+	/*!
+	 *  Save sorted pin to file
+	 */
+	function save_file() {
+		if(document.getElementById("output").value == "") {
+			alert("Output is empty")
+		} else {
+			var a = document.createElement("a");
+			a.href = window.URL.createObjectURL(new Blob([document.getElementById("output").value], {type: "text/plain"}));
+			a.download = `pin_sorted.txt`;
+			a.click();
+		}
 	};
 </script>
 

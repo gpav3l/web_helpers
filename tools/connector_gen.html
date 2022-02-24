@@ -56,20 +56,7 @@
 
 		<!-- Left Column -->
 		<div class="col-sm-3">
-			<div class="panel panel-default">
-				
-				<div class="panel-heading">
-					<h1 class="panel-title"><span class="glyphicon glyphicon-random"></span> Options</h1>
-				</div>
-				<div class="list-group">
-					<list>
-					<ul><input id="is_gnd_concate" type="checkbox">Concate GND pins</ul>
-					</list>
-				</div>
-				<div class="panel-heading">
-					<button onclick="process()">Generate symbol</button>
-				</div>
-			</div>
+			
 		</div><!--/Left Column-->
   
   
@@ -97,12 +84,12 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 					<tr><th>Description</th><td><input id="symbol_desc" type="text" value="" size="90"></td></tr>	
 					<tr><th>Datasheet</th><td><input id="symbol_ds" type="text" size="90"></td></tr>
 				</table>
-	
 				</table>
 			</div>
 			</div>
 			</div><hr>
 			
+			<!-- Work table -->
 			<div class="row">
 				<table>
 		<tr>
@@ -126,7 +113,26 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 		</tr>
 	</table>
 			</div>
-			
+		
+		<!-- Control and launch -->
+		<div class="row">
+			<div class="panel panel-default">
+				
+				<div class="panel-heading">
+					<h1 class="panel-title"><span class="glyphicon glyphicon-random"></span> Options</h1>
+				</div>
+				<div class="list-group">
+					<list>
+					<ul><input id="is_gnd_concate" type="checkbox">Concate GND pins</ul>
+					</list>
+				</div>
+				<div class="panel-heading">
+					<button onclick="process()">Generate symbol</button>
+					<button onclick="save_file()">Save file</button>
+				</div>
+			</div>
+			</div>
+					
 		</div><!--/Center Column-->
 
 
@@ -277,6 +283,20 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 			symbol_text += symbol_lines + symbol_pins + ")\r\n";
 		});
 		document.getElementById("output").value = symbol_text + ")";
+	};
+	
+	/*!
+	 *  Save .kicad_sim file
+	 */
+	function save_file() {
+		if(document.getElementById("output").value == "") {
+			alert("Output is empty")
+		} else {
+			var a = document.createElement("a");
+			a.href = window.URL.createObjectURL(new Blob([document.getElementById("output").value], {type: "text/plain"}));
+			a.download = `pin_sorted.txt`;
+			a.click();
+		}
 	};
 </script>
 
