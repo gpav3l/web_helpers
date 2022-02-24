@@ -1,3 +1,19 @@
+<script>
+	const y_init = -2.54
+	const y_step = -5.08
+	const pin_types ={"P": "power", "IO": "bidirectional", "I": "input", "O": "output"}
+	
+	function update_pin_info() {
+		out_text = "empty - passive<br>"
+		for (var key in pin_types) {
+			if (pin_types.hasOwnProperty(key)) {           
+				out_text += `"${key}" - ${pin_types[key]}<br>`;
+			}
+		}
+		document.getElementById("pin_types_info").innerHTML = out_text
+	};
+</script>
+
 <!DOCTYPE html>
 <!-- Template by Quackit.com -->
 <html lang="en">
@@ -24,7 +40,7 @@
 
 </head>
 
-<body>
+<body onload="update_pin_info()">
 
     <!-- Navigation -->
     <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
@@ -56,7 +72,23 @@
 
 		<!-- Left Column -->
 		<div class="col-sm-3">
+			<div class="panel panel-default">
+			<div class="panel-heading">
+					<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Tips image</h1>
+				</div>
+			<div class="panel-body">
+				<img src="../images/conn_gen_tips.png" alt="Tips image">
+			</div>
+			</div>
 			
+			<div class="panel panel-default">
+			<div class="panel-heading">
+					<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Avaible pin types</h1>
+				</div>
+			<div class="panel-body">
+				<p id="pin_types_info"></p>
+			</div>
+			</div>			
 		</div><!--/Left Column-->
   
   
@@ -91,27 +123,25 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 			
 			<!-- Work table -->
 			<div class="row">
-				<table>
-		<tr>
-			<th>Type pin list or <button onclick="openFile(dispFile)">open a file</button></th>
-			<th></th>
-			<th>Result</th>
-		</tr>
-		<tr>
-			<td><textarea id="pin_list" rows="40" cols="60">1 GND Ground pin
-2 VCC Power pin
-3 GPIO Digital Input/Output 1
-5 GND Ground pin
+			<table><tr>
+				<th>Type pin list or <button onclick="openFile(dispFile)">open a file</button></th>
+				<th></th>
+				<th>Result</th>
+				</tr>
+				<tr>
+				<td><textarea id="pin_list" rows="40" cols="60">1 GND P Ground pin
+2 VCC P Power pin
+3 GPIO IO Digital Input/Output 1
+5 GND P Ground pin
 
-4 GPIO Digital Input/Output 2
+4 GPI I Digital Input/Output 2
 10 AGND Analog power rail
 6 VCC Power pin
 7 AVCC Analog power rail
 8 AGND Analog power rail</textarea></td>
-			<td><=></td>
-			<td><textarea id="output" rows="40" cols="60" readonly></textarea></td>
-		</tr>
-	</table>
+				<td><=></td>
+				<td><textarea id="output" rows="40" cols="60" readonly></textarea></td>
+			</tr></table>
 			</div>
 		
 		<!-- Control and launch -->
@@ -138,15 +168,7 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 
 	  <!-- Right Column -->
 	  <div class="col-sm-3">
-			<div class="panel panel-default">
-			<div class="panel-heading">
-					<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Tips image</h1>
-				</div>
-			<div class="panel-body">
-				<img src="../images/conn_gen_tips.png" alt="Tips image">
-			</div>
-			</div>
-			
+
 	  </div><!--/Right Column -->
 
 	</div><!--/container-fluid-->
@@ -167,9 +189,6 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 </body>
 
 <script>
-	const y_init = -2.54
-	const y_step = -5.08
-	
 	/*!
 	 * Print out file content into input textarea
 	 */
@@ -218,7 +237,8 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 	 * label - pin name
 	 */
 	function get_parsed_pins(raw_list){
-		const split_regex = new RegExp('^(\\S+)\[\\t\\s\]+(\\S+).*?$');
+		
+		const split_regex = new RegExp('^(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(P|IO|I|O)?.*?$');
 		sort_list = []
 		sub_list = []
 		lines = raw_list.split("\n")
@@ -229,8 +249,10 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 				sub_list = []
 			} else {
 				if (item.match(split_regex) != null) {
+					pin_type = "passive"
 					temp = split_regex.exec(item)
-					sub_list.push({"index":temp[1], "label":temp[2]})
+					if(temp[3] !== undefined) pin_type = pin_types[temp[3]]
+					sub_list.push({"index":temp[1], "label":temp[2], "type":pin_type})
 				}
 			}
 		});
@@ -292,7 +314,7 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 						first_grp_pin[pin_name] = pos_y;
 					}else {
 						temp_y = first_grp_pin[pin_name].toFixed(3)
-						symbol_pins += `(pin passive line (at 15.24 ${temp_y} 180) (length 5.08) hide`
+						symbol_pins += `(pin  ${item["type"]} line (at 15.24 ${temp_y} 180) (length 5.08) hide`
 						symbol_pins += `(name "${item["label"]}" (effects (font (size 1.27 1.27)))) `
 						symbol_pins += `(number "${item["index"]}" (effects (font (size 1.27 1.27)))))\r\n`
 						return;		
@@ -300,7 +322,7 @@ Place empty stroke in pin list to delimeter pin by group. Each group generate se
 				}
 				symbol_pins += `(text "${item["index"]}" (at 4.826 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
 				symbol_pins += `(text "${item["label"]}" (at -8.89 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
-				symbol_pins += `(pin passive line (at 15.24 ${pos_y.toFixed(3)} 180) (length 5.08) `
+				symbol_pins += `(pin ${item["type"]} line (at 15.24 ${pos_y.toFixed(3)} 180) (length 5.08) `
 				symbol_pins += `(name "${item["label"]}" (effects (font (size 1.27 1.27)))) `
 				symbol_pins += `(number "${item["index"]}" (effects (font (size 1.27 1.27)))))\r\n`		
 				pos_y += y_step;
