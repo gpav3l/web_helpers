@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<!-- Template by Quackit.com -->
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+
+    <title>Portal 1</title>
+
+    <!-- Bootstrap Core CSS -->
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS: You can use this stylesheet to override any Bootstrap styles and/or apply your own styles -->
+    <link href="../css/custom.css" rel="stylesheet">
+
+    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
+        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+
+</head>
+
+<body>
+
+    <!-- Navigation -->
+    <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
+        <div class="container">
+            <!-- Logo and responsive toggle -->
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#"><span class="glyphicon glyphicon-globe"></span> Logo</a>
+            </div>
+            <!-- Navbar links -->
+            <div class="collapse navbar-collapse" id="navbar">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="../index.html">Home</a></li>
+                    <li><a href="https://github.com/gpav3l/kicad_web_helper">About</a></li>
+                </ul>
+
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container -->
+    </nav>
+
+<div class="container-fluid">
+
+		<!-- Left Column -->
+		<div class="col-sm-3">
+			<div class="panel panel-default">
+				
+				<div class="panel-heading">
+					<h1 class="panel-title"><span class="glyphicon glyphicon-random"></span> Options</h1>
+				</div>
+				<div class="list-group">
+					<list>
+					<ul><input id="sort_by_info" type="radio" name="sort_type" checked="checked">Sort by pin info</ul>
+					<ul><input id="sort_by_name" type="radio" name="sort_type">Sort by pin name</ul>
+					</list>
+				</div>
+				<div class="panel-heading">
+					<button onclick="process()">Sort pins</button>
+				</div>
+			</div>
+		</div><!--/Left Column-->
+  
+  
+		<!-- Center Column -->
+		<div class="col-sm-6">
+			<!-- Articles -->
+			<div class="row">
+				<article class="col-xs-12">
+					<h2>Description</h2>
+					<p>Place in left textarea list of pin in format "pin_number pin_name pin_description" and click on Sort button, take from right textarea sorted by group, that can be used to past into *.kicad_sym generation page.</p>
+				</article>
+			</div><hr>
+			<div class="row">
+				<table>
+		<tr>
+			<th>Type pin list or <button onclick="openFile(dispFile)">open a file</button></th>
+			<th></th>
+			<th>Result</th>
+		</tr>
+		<tr>
+			<td><textarea id="pin_list" rows="40" cols="80">1 GND Ground pin
+2 VCC Power pin
+3 GPIO Digital Input/Output 1
+5 GND Ground pin
+4 GPIO Digital Input/Output 2
+6 VCC Power pin
+7 AVCC Analog power rail
+8 AGND Analog power rail</textarea></td>
+			<td><=></td>
+			<td><textarea id="output" rows="40" cols="80" readonly></textarea></td>
+		</tr>
+	</table>
+			</div>
+			
+		</div><!--/Center Column-->
+
+
+	  <!-- Right Column -->
+	  <div class="col-sm-3">
+	  </div><!--/Right Column -->
+
+	</div><!--/container-fluid-->
+	
+	
+    <!-- jQuery -->
+    <script src="../js/jquery-1.11.3.min.js"></script>
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="../js/bootstrap.min.js"></script>
+	
+	<!-- IE10 viewport bug workaround -->
+	<script src="../js/ie10-viewport-bug-workaround.js"></script>
+	
+	<!-- Placeholder Images -->
+	<script src="../js/holder.min.js"></script>
+	
+</body>
+
+<script>
+	/*!
+	 * Print out file content into input textarea
+	 */
+	function dispFile(contents) {
+	  document.getElementById('pin_list').innerHTML=contents
+	}
+	
+	/*!
+	 * Catch file select
+	 */
+	function clickElem(elem) {
+		var eventMouse = document.createEvent("MouseEvents")
+		eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
+		elem.dispatchEvent(eventMouse)
+	}
+	
+	/*!
+	 * Show open file dialog
+	 */
+	function openFile(func) {
+		readFile = function(e) {
+			var file = e.target.files[0];
+			if (!file) {
+				return;
+			}
+			var reader = new FileReader();
+			reader.onload = function(e) {
+				var contents = e.target.result;
+				fileInput.func(contents)
+				document.body.removeChild(fileInput)
+			}
+			reader.readAsText(file)
+		}
+		fileInput = document.createElement("input")
+		fileInput.type='file'
+		fileInput.accept='.txt'
+		fileInput.style.display='none'
+		fileInput.onchange=readFile
+		fileInput.func=func
+		document.body.appendChild(fileInput)
+		clickElem(fileInput)
+	}
+	
+	/*!
+	 * Parse raw input to pin number, pin name and pin description
+	 */
+	function parse_input(raw_text) {
+		parsed_list=[]
+		line_list=raw_text.split('\n')
+		
+		line_list.forEach(function(item, index) {
+			temp = item.split(/\s+/);
+			if(temp.length >= 3) parsed_list.push({id: temp[0], name: temp[1], info: temp.slice(2).join(' ')})
+		});
+		
+		return parsed_list;
+	};
+	
+	/*!
+	 * Sort pin by info field
+	 */
+	function sort_by_info(list){
+		list.sort(function(a,b){
+			if(a.info < b.info) { return -1; }
+			if(a.info > b.info) { return 1; }
+			return 0;
+		});
+		
+		ret_text = `${list[0]["id"]} ${list[0]["name"]} ${list[0]["info"]}\r\n`
+		for(i=1; i<list.length; i++){
+			if(list[i-1]["info"] != list[i]["info"]) ret_text += "\r\n"
+			ret_text += `${list[i]["id"]} ${list[i]["name"]} ${list[i]["info"]}\r\n`
+		}
+		
+		return ret_text;
+	};
+	
+	/*!
+	 * Sort pin by name field
+	 */
+	function sort_by_name(list){
+		list.sort(function(a,b){
+			if(a.name < b.name) { return -1; }
+			if(a.name > b.name) { return 1; }
+			return 0;
+		});
+		
+		ret_text = `${list[0]["id"]} ${list[0]["name"]} ${list[0]["info"]}\r\n`
+		for(i=1; i<list.length; i++){
+			if(list[i-1]["name"] != list[i]["name"]) ret_text += "\r\n"
+			ret_text += `${list[i]["id"]} ${list[i]["name"]} ${list[i]["info"]}\r\n`
+		}
+		
+		return ret_text;
+	};
+	
+	/*!
+	 *  Main process for build kicad symbol structure
+	 */
+	function process(){
+		list = parse_input(document.getElementById("pin_list").value)
+		res_ouput = ""
+		
+		if(document.getElementById("sort_by_info").checked)
+			res_output = sort_by_info(list);
+		else if(document.getElementById("sort_by_name").checked)
+			res_output = sort_by_name(list);				
+		
+		document.getElementById("output").value = res_output;
+	};
+</script>
+
+</html>
