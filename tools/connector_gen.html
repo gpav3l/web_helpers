@@ -1,5 +1,6 @@
 <script>
-	const pin_split_regex = new RegExp('^(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(P|IO|I|O)?.*?$');
+	const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(P|IO|I|O)?.*?$');
+	const func_name_regex = new RegExp('^\[\\t\\s\]*>\[\\t\\s\]*(\\S+)$');
 	const y_init = -2.54
 	const y_step = -5.08
 	const pin_types ={"P": "power", "IO": "bidirectional", "I": "input", "O": "output"}
@@ -13,9 +14,9 @@
 		}
 		document.getElementById("pin_types_info").innerHTML = out_text
 		
-		document.getElementById("description").innerHTML = `Place in left textarea list of pin in format: pin_number pin_name [pin_type] [additional info].<br> 
+		document.getElementById("description").innerHTML = `Place in left textarea list of pin in format: "pin_number pin_name [pin_type] [additional info]".<br> 
 									After generation take from right textarea text and past it into necesary *.kicad_sym file, or use Save file button to save symbol in separate *.kicad_sym file.<br> 
-									Place empty stroke in pin list to delimeter pin by group. Each group generate separete unit in symbol.`
+									Place empty stroke and/or functional name (format: ">Functional name") in pin list to delimeter pin by group. Each group generate separete unit in symbol.<br>`
 		
 	};
 </script>
@@ -23,6 +24,7 @@
 <!DOCTYPE html>
 <!-- Template by Quackit.com -->
 <html lang="en">
+	
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -116,7 +118,7 @@
 			<div class="panel-body">
 				<table><tr><th>Reference</th><td><input id="symbol_ref" type="text" value="XP" width="3" size="3"></td></tr>
 				<tr><th>Symbol name</th><td><input id="symbol_name" type="text" value="Connector"></td></tr>
-				<tr><th>Functional name</th><td><input id="symbol_fname" type="text" value=""></td>	</tr>
+				<tr><td>&nbsp;</td></tr>
 				<table>
 					<tr><th>Description</th><td><input id="symbol_desc" type="text" value="" size="90"></td></tr>	
 					<tr><th>Datasheet</th><td><input id="symbol_ds" type="text" size="90"></td></tr>
@@ -134,17 +136,20 @@
 				<th>Result</th>
 				</tr>
 				<tr>
-				<td><textarea id="pin_list" rows="40" cols="60">1 GND P Ground pin
+				<td><textarea id="pin_list" rows="40" cols="60">
+>Test
+1 GND P Ground pin
 2 VCC P Power pin
 3 GPIO IO Digital Input/Output 1
 5 GND P Ground pin
 
+>Functional
 4 GPI I Digital Input/Output 2
 10 AGND Analog power rail
 6 VCC Power pin
 7 AVCC Analog power rail
 8 AGND Analog power rail</textarea></td>
-				<td><=></td>
+				<td>&nbsp;</td>
 				<td><textarea id="output" rows="40" cols="60" readonly></textarea></td>
 			</tr></table>
 			</div>
@@ -237,30 +242,39 @@
 		clickElem(fileInput)
 	}
 	
-	/*! From raw text parse and return array of dictionary with keys: 
-	 * index - pin number, 
-	 * label - pin name
+	/*! 
+	 * Parse text to pin list
 	 */
 	function get_parsed_pins(raw_list){		
 		sort_list = []
 		sub_list = []
+		func_name = "";
+		
 		lines = raw_list.split("\n")
 		
 		lines.forEach(function (item, index) {
-			if(item == "") {
-				if(sub_list.length != 0) sort_list.push(sub_list);
-				sub_list = []
+			if(item == "" | (item.match(func_name_regex) != null)) {
+				if(sub_list.length != 0) { 
+					sort_list.push({fname: func_name, pin_list: sub_list});
+					sub_list = []
+				}
+			
+				if(item.match(func_name_regex) != null) { 
+					func_name = func_name_regex.exec(item)[1];
+				} else {
+					func_name = "";
+				}				
 			} else {
-				if (item.match(pin_split_regex) != null) {
+				if (item.match(pin_regex) != null) {
 					pin_type = "passive"
-					temp = pin_split_regex.exec(item)
+					temp = pin_regex.exec(item)
 					if(temp[3] !== undefined) pin_type = pin_types[temp[3]]
 					sub_list.push({"index":temp[1], "label":temp[2], "type":pin_type})
 				}
 			}
 		});
 		
-		if(sub_list.length != 0) sort_list.push(sub_list);
+		if(sub_list.length != 0) sort_list.push({fname: func_name, pin_list: sub_list});
 		
 		return sort_list;
 	};
@@ -295,7 +309,7 @@
 		result = "";
 		id_dict = {};
 		pins_list.forEach(function(list) {
-			list.forEach(function(item) {
+			list["pin_list"].forEach(function(item) {
 				if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
 				else result = item["index"];
 			});
@@ -330,7 +344,7 @@
 			
 			// Pin and name field
 			pos_y = y_init
-			pins.forEach(function(item) {
+			pins["pin_list"].forEach(function(item) {
 				pin_name = item["label"].toUpperCase()
 				if(is_gnd_concate & /\S*GND\S*/.test(pin_name)) {
 					if(first_grp_pin[pin_name] === undefined) {
@@ -352,9 +366,9 @@
 				show_pin_count++;				
 			});
 			
-			symbol_pins += "(text \"Цепь\" (at -10.16 2.54 0)(effects (font (size 2.0066 2.0066))))\r\n"
-			if(document.getElementById("symbol_fname").value != null) {
-				symbol_pins += `(text "${document.getElementById("symbol_fname").value}" (at -3.81 ${show_pin_count*y_step+y_init} 0)(effects (font (size 2.0066 2.0066))))\r\n`
+			symbol_pins += "(text \"Цепь\" (at -10.16 2.54 0)(effects (font (size 2 2))))\r\n"
+			if(pins["fname"] != "") {
+				symbol_pins += `(text "${pins["fname"]}" (at -3.81 ${show_pin_count*y_step+y_init} 0)(effects (font (size 2.0066 2.0066))))\r\n`
 			}
 			
 			/* Lines generation */
@@ -362,7 +376,7 @@
 			symbol_lines += `(rectangle (start -20.32 5.08) (end 10.16 ${y_step*show_pin_count}) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
 			
 			for (i=0; ; i+=y_step) { 
-				symbol_lines += `(polyline (pts(xy -20.32 ${i}) (xy 10.16 ${i})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
+				symbol_lines += `(polyline (pts(xy -20.32 ${i}) (xy 10.16 ${i.toFixed(3)})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
 				if(i <= y_step*(show_pin_count-1))
 					break;
 			}
