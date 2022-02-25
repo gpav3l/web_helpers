@@ -1,3 +1,12 @@
+<script>
+	window.onload = function () {
+		
+		document.getElementById("description").innerHTML = `Place in left textarea list of pin in format: pin_number pin_name pin_description<br>
+		Copy from right textarea sorted by group pins, or save into *.txt file.`
+		
+	};
+</script>
+
 <!DOCTYPE html>
 <!-- Template by Quackit.com -->
 <html lang="en">
@@ -65,7 +74,7 @@
 			<div class="row">
 				<article class="col-xs-12">
 					<h2>Description</h2>
-					<p>Place in left textarea list of pin in format "pin_number pin_name pin_description" and click on Sort button, take from right textarea sorted by group, that can be used to past into *.kicad_sym generation page.</p>
+					<p id="description"></p>
 				</article>
 			</div><hr>
 			<div class="row">

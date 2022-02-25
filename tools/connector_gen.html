@@ -3,7 +3,7 @@
 	const y_step = -5.08
 	const pin_types ={"P": "power", "IO": "bidirectional", "I": "input", "O": "output"}
 	
-	function update_pin_info() {
+	window.onload = function () {
 		out_text = "empty - passive<br>"
 		for (var key in pin_types) {
 			if (pin_types.hasOwnProperty(key)) {           
@@ -11,6 +11,11 @@
 			}
 		}
 		document.getElementById("pin_types_info").innerHTML = out_text
+		
+		document.getElementById("description").innerHTML = `Place in left textarea list of pin in format: pin_number pin_name [pin_type] [additional info].<br> 
+									After generation take from right textarea text and past it into necesary *.kicad_sym file, or use Save file button to save symbol in separate *.kicad_sym file.<br> 
+									Place empty stroke in pin list to delimeter pin by group. Each group generate separete unit in symbol.`
+		
 	};
 </script>
 
@@ -40,7 +45,7 @@
 
 </head>
 
-<body onload="update_pin_info()">
+<body>
 
     <!-- Navigation -->
     <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
@@ -98,8 +103,7 @@
 			<div class="row">
 				<article class="col-xs-12">
 					<h2>Description</h2>
-					<p>Place in left textarea list of pin in format "pin_number pin_name [pin_type] [additional info]" and click on Generate button, take from right textarea text and past it into necesary *.kicad_sym file. 
-Place empty stroke in pin list to delimeter pin by group. Each group generate separete unit in symbol.</p>
+					<p id="description"></p>
 				</article>
 			</div><hr>
 			
