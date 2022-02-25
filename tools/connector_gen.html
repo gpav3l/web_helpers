@@ -1,3 +1,4 @@
+
 <script>
 	const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(PI|PO|IO|I|O)?.*?$');
 	const func_name_regex = new RegExp('^\[\\t\\s\]*>\[\\t\\s\]*(\\S+)$');
@@ -12,6 +13,7 @@
 				out_text += `"${key}" - ${pin_types[key]}<br>`;
 			}
 		}
+		    
 		document.getElementById("pin_types_info").innerHTML = out_text
 		
 		document.getElementById("description").innerHTML = `Place in left textarea list of pin in format: "pin_number pin_name [pin_type] [additional info]".<br> 
@@ -19,6 +21,8 @@
 									Place empty stroke and/or functional name (format: ">Functional name") in pin list to delimeter pin by group. Each group generate separete unit in symbol.<br>`
 		
 	};
+	
+	
 </script>
 
 <!DOCTYPE html>
@@ -80,63 +84,61 @@
 
 		<!-- Left Column -->
 		<div class="col-sm-3">
-			<div class="panel panel-default">
-			<div class="panel-heading">
-					<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Tips image</h1>
+			<div class="panel panel-default">				
+				<div class="panel-heading">
+						<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Tips image</h1>
+					</div>
+				<div class="panel-body">
+					<img style="max-width:100%;max-height:100%;" src="../images/conn_gen_tips.png" alt="Tips image">
 				</div>
-			<div class="panel-body">
-				<img src="../images/conn_gen_tips.png" alt="Tips image">
-			</div>
-			</div>
-			
-			<div class="panel panel-default">
-			<div class="panel-heading">
-					<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Avaible pin types</h1>
+				
+				<div class="panel-heading">
+						<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Avaible pin types</h1>
+					</div>
+				<div class="panel-body">
+					<p id="pin_types_info"></p>
 				</div>
-			<div class="panel-body">
-				<p id="pin_types_info"></p>
-			</div>
+				
+				<div class="panel-heading">
+						<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Description</h1>
+					</div>
+				<div class="panel-body">
+					<p id="description"></p>
+				</div>	
 			</div>			
 		</div><!--/Left Column-->
   
   
 		<!-- Center Column -->
 		<div class="col-sm-6">
-			<!-- Articles -->
-			<div class="row">
-				<article class="col-xs-12">
-					<h2>Description</h2>
-					<p id="description"></p>
-				</article>
-			</div><hr>
-			
+			<!-- Articles -->			
 			<div class="row">
 			<div class="panel panel-default">
 			<div class="panel-heading">
-					<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Global config</h1>
+					<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Config</h1>
 				</div>
 			<div class="panel-body">
 				<table><tr><th>Reference</th><td><input id="symbol_ref" type="text" value="XP" width="3" size="3"></td></tr>
 				<tr><th>Symbol name</th><td><input id="symbol_name" type="text" value="Connector"></td></tr>
 				<tr><td>&nbsp;</td></tr>
 				<table>
-					<tr><th>Description</th><td><input id="symbol_desc" type="text" value="" size="90"></td></tr>	
-					<tr><th>Datasheet</th><td><input id="symbol_ds" type="text" size="90"></td></tr>
+					<tr><th>Description</th><td><input style="width:100%;" id="symbol_desc" type="text" value="" size="90"></td></tr>	
+					<tr><th>Datasheet</th><td><input style="width:100%;" id="symbol_ds" type="text" size="90"></td></tr>
 				</table>
 				</table>
+			</div>
+			<div class="list-group">
+				<list>
+				<ul><input id="is_gnd_concate" type="checkbox"> Show only one GND pins (hide other)</ul>
+				</list>
 			</div>
 			</div>
 			</div><hr>
 			
 			<!-- Work table -->
 			<div class="row">
-			<table><tr>
-				<th>Type pin list or <button onclick="openFile(dispFile)">open a file</button></th>
-				<th></th>
-				<th>Result</th>
-				</tr>
-				<tr>
-				<td><textarea id="pin_list" rows="40" cols="60">
+				<button onclick="openFile(dispFile)">Open</button><label> or type below</label>
+<textarea class="data_input" id="pin_list" rows="40" cols="60">
 >Test
 1 GND PI Ground pin
 2 VCC PI Power pin
@@ -148,41 +150,38 @@
 10 AGND Analog power rail
 6 VCC Power pin
 7 AVCC Analog power rail
-8 AGND Analog power rail</textarea></td>
-				<td>&nbsp;</td>
-				<td><textarea id="output" rows="40" cols="60" readonly></textarea></td>
-			</tr></table>
+8 AGND Analog power rail</textarea>
 			</div>
 		
 		<!-- Control and launch -->
-		<div class="row">
-			<div class="panel panel-default">
-				
-				<div class="panel-heading">
-					<h1 class="panel-title"><span class="glyphicon glyphicon-random"></span> Options</h1>
-				</div>
-				<div class="list-group">
-					<list>
-					<ul><input id="is_gnd_concate" type="checkbox">Concate GND pins</ul>
-					</list>
-				</div>
-				<div class="panel-heading">
-					<button onclick="process()">Generate symbol</button>
-					<button onclick="save_file()">Save file</button>
-				</div>
-			</div>
-			</div>
+		
 					
 		</div><!--/Center Column-->
 
 
 	  <!-- Right Column -->
 	  <div class="col-sm-3">
-
+		
 	  </div><!--/Right Column -->
 
 	</div><!--/container-fluid-->
-	
+
+<div id="popup_result" class="overlay">
+	<div class="popup">
+		<h2>Result</h2>
+		<a class="close" href="#">&times;</a>
+		<div class="content ">
+			<textarea class="gen_result" id="output" readonly></textarea>
+		</div>
+		<div>
+			<button onclick="save_file()">Save file</button>
+		</div>
+	</div>
+</div>
+<div class="box">
+	<button onclick="process()">Generate symbol</button>
+</div>
+
 	
     <!-- jQuery -->
     <script src="../js/jquery-1.11.3.min.js"></script>
@@ -385,6 +384,7 @@
 			symbol_text += symbol_lines + symbol_pins + ")\r\n";
 		});
 		document.getElementById("output").value = symbol_text + ")";
+		location.href = "#popup_result";
 	};
 	
 	/*!
