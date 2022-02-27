@@ -65,40 +65,22 @@
 
 		<!-- Left Column -->
 		<div class="col-sm-3">
+			<div class="panel panel-default">
+				<div class="panel-heading">
+					<h1 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Description</h1>
+				</div>
+				<div class="panel-body">
+					<p id="description"></p>
+				</div>
+			</div>	
 		</div><!--/Left Column-->
   
   
 		<!-- Center Column -->
 		<div class="col-sm-6">
 			<!-- Articles -->
-			<div class="row">
-				<article class="col-xs-12">
-					<h2>Description</h2>
-					<p id="description"></p>
-				</article>
-			</div><hr>
-			<div class="row">
-			<table><tr>
-				<th>Type pin list or <button onclick="openFile(dispFile)">open a file</button></th>
-				<th></th>
-				<th>Result</th>
-				</tr>
-				<tr>
-				<td><textarea id="pin_list" rows="40" cols="80">1 GND Ground pin
-2 VCC Power pin
-3 GPIO Digital Input/Output 1
-5 GND Ground pin
-4 GPIO Digital Input/Output 2
-6 VCC Power pin
-7 AVCC Analog power rail
-8 AGND Analog power rail</textarea></td>
-				<td><=></td>
-				<td><textarea id="output" rows="40" cols="80" readonly></textarea></td>
-			</tr></table>
-			</div>
-		
 		<div class="row">
-		<div class="panel panel-default">
+			<div class="panel panel-default">
 				<div class="panel-heading">
 					<h1 class="panel-title"><span class="glyphicon glyphicon-random"></span> Options</h1>
 				</div>
@@ -108,13 +90,22 @@
 					<ul><input id="sort_by_name" type="radio" name="sort_type">Sort by pin name</ul>
 					</list>
 				</div>
-				<div class="panel-heading">
-					<button onclick="process()">Sort pins</button>
-					<button onclick="save_file()">Save file</button>
-				</div>
 			</div>
 		</div>
-			
+		
+			<div class="row">
+			<table><tr>
+				<label>Type pin list or </label><button onclick="openFile(dispFile)">open a file</button>
+				<textarea class="data_input" id="pin_list" rows="40" cols="80">1 GND Ground pin
+2 VCC Power pin
+3 GPIO Digital Input/Output 1
+5 GND Ground pin
+4 GPIO Digital Input/Output 2
+6 VCC Power pin
+7 AVCC Analog power rail
+8 AGND Analog power rail</textarea>
+			</div>
+					
 		</div><!--/Center Column-->
 
 
@@ -123,7 +114,22 @@
 	  </div><!--/Right Column -->
 
 	</div><!--/container-fluid-->
-	
+
+	<div id="popup_result" class="overlay">
+		<div class="popup">
+			<h2>Result</h2>
+			<a class="close" href="#">&times;</a>
+			<div class="content ">
+				<textarea class="gen_result" id="output" readonly></textarea>
+			</div>
+			<div>
+				<button onclick="save_file()">Save file</button>
+			</div>
+		</div>
+	</div>
+	<div class="box">
+		<a class="button" href="#popup_result" onclick="process()">Generate</a>
+	</div>	
 	
     <!-- jQuery -->
     <script src="../js/jquery-1.11.3.min.js"></script>
@@ -248,7 +254,7 @@
 		else if(document.getElementById("sort_by_name").checked)
 			res_output = sort_by_name(list);				
 		
-		document.getElementById("output").value = res_output;
+		document.getElementById("gen_result").value = res_output;
 	};
 	
 	/*!

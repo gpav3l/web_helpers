@@ -166,21 +166,21 @@
 
 	</div><!--/container-fluid-->
 
-<div id="popup_result" class="overlay">
-	<div class="popup">
-		<h2>Result</h2>
-		<a class="close" href="#">&times;</a>
-		<div class="content ">
-			<textarea class="gen_result" id="output" readonly></textarea>
-		</div>
-		<div>
-			<button onclick="save_file()">Save file</button>
+	<div id="popup_result" class="overlay">
+		<div class="popup">
+			<h2>Result</h2>
+			<a class="close" href="#">&times;</a>
+			<div class="content ">
+				<textarea class="gen_result" id="output" readonly></textarea>
+			</div>
+			<div>
+				<button onclick="save_file()">Save file</button>
+			</div>
 		</div>
 	</div>
-</div>
-<div class="box">
-	<button onclick="process()">Generate symbol</button>
-</div>
+	<div class="box">
+		<a class="button" href="#popup_result" onclick="process()">Generate</a>
+	</div>
 
 	
     <!-- jQuery -->
@@ -252,7 +252,7 @@
 		lines = raw_list.split("\n")
 		
 		lines.forEach(function (item, index) {
-			if(item == "" | (item.match(func_name_regex) != null)) {
+			if(item.match(new RegExp('^\[\\t\\s\]*$')) | (item.match(func_name_regex) != null)) {
 				if(sub_list.length != 0) { 
 					sort_list.push({fname: func_name, pin_list: sub_list});
 					sub_list = []
@@ -384,7 +384,7 @@
 			symbol_text += symbol_lines + symbol_pins + ")\r\n";
 		});
 		document.getElementById("output").value = symbol_text + ")";
-		location.href = "#popup_result";
+		//location.href = "#popup_result";
 	};
 	
 	/*!
