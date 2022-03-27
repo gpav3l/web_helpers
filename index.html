@@ -5,118 +5,103 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    
+    <title>KiCAD helper</title>
 
-    <title>Portal 1</title>
-
-    <!-- Bootstrap Core CSS -->
     <link href="css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- Custom CSS: You can use this stylesheet to override any Bootstrap styles and/or apply your own styles -->
+    <link href="css/sidebars.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
-
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/libs/html5shiv/3.7.0/html5shiv.js"></script>
-        <script src="https://oss.maxcdn.com/libs/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
+	
+	<script src="js/page_gen_parts.js"></script>
+	<script src="js/open_file.js"></script>
+	
+	<!-- Description and process js for selected tools --> 
+	<script>	
+		window.onload = function () {
+			gen_page_content();
+			document.getElementById("description").innerHTML = `Place in textarea list of pin in format: <b>pin_number pin_name pin_description</b><br>
+		Copy from right textarea sorted by group pins, or save into *.txt file.`			
+		};	
+	</script>
+	<script src="tools/pin_grouping.js"></script>
+	
 </head>
 
 <body>
-
-    <!-- Navigation -->
-    <nav class="navbar navbar-inverse navbar-static-top" role="navigation">
-        <div class="container">
-            <!-- Logo and responsive toggle -->
-            <div class="navbar-header">
-                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar">
-                    <span class="sr-only">Toggle navigation</span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                    <span class="icon-bar"></span>
-                </button>
-                
-            </div>
-            <!-- Navbar links -->
-            <div class="collapse navbar-collapse" id="navbar">
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Home</a></li>
-                    <li><a href="https://github.com/gpav3l/kicad_web_helper">About</a></li>
-                </ul>
-
-            </div>
-            <!-- /.navbar-collapse -->
-        </div>
-        <!-- /.container -->
-    </nav>
-
+	
 <div class="container-fluid">
-
-		<!-- Left Column -->
-		<div class="col-sm-3">
-		</div><!--/Left Column-->
-  
-  
-		<!-- Center Column -->
-		<div class="col-sm-6">
-			<!-- Articles -->
+	<div class="row" > 
+		<!-- Sidebar -->
+		<div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px;">
+			<h6>Tools select</h6>
+			<ul id="page_list" class="nav nav-pills flex-column mb-auto">
+			</ul>
+		</div>
+		
+		<!-- Main content -->
+		<div class="col-sm-9">
 			<div class="row">
-				<div class="col-sm-6 footer-blurb-item">
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<h3> Pin sorter</h3>
+				<!--<div class="col-sm-3">
+					
+				</div>-->
+				<div class="col-sm-8">
+					<div class="card">
+						<div class="card-header">
+							Description
+						 </div>
+						<div class="card-body">
+							<p id="description"></p>
 						</div>
-						<div class="panel-heading">
-							<a class="btn btn-default" href="./pages/pin_grouping.html">Open</a>
+						<div class="list-group">
+							<list>
+							<ul><input id="sort_by_info" type="radio" name="sort_type" checked="checked">Sort by pin info</ul>
+							<ul><input id="sort_by_name" type="radio" name="sort_type">Sort by pin name</ul>
+							</list>
 						</div>
-					</div>		
-				</div>
-				<div class="col-sm-6 footer-blurb-item">
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<h3> Connector </h3>
+						<div class="card-body">
+<textarea class="data_input" id="pin_list" rows="40" cols="80">1 GND Ground pin
+2 VCC Power pin
+3 GPIO Digital Input/Output 1
+5 GND Ground pin
+4 GPIO Digital Input/Output 2
+6 VCC Power pin
+7 AVCC Analog power rail
+8 AGND Analog power rail
+</textarea>
 						</div>
-						<div class="panel-heading">
-							<a class="btn btn-default" href="./pages/connector_gen.html">Open</a>
-						</div>
-					</div>		
-				</div>
-				<div class="col-sm-6 footer-blurb-item">
-					<div class="panel panel-default">
-						<div class="panel-body">
-							<h3> IC symbol</h3>
-						</div>
-						<div class="panel-heading">
-							<a class="btn btn-default" href="./pages/ic_gen.html">Open</a>
-						</div>
-					</div>		
+			
+					</div>
 				</div>
 			</div>
-			
-		</div><!--/Center Column-->
+		</div>
+	</div>
+	
+	<nav class="navbar fixed-bottom navbar-light bg-light">
+	  <div class="container-fluid">
+		<button class="nav-link button" onclick="openFile(dispFile)">Load</button>
+		<a class="nav-link button" href="#popup_result" onclick="process()">Generate</a>
+	  </div>
+	</nav>
 
+</div>
 
-	  <!-- Right Column -->
-	  <div class="col-sm-3">
-	  </div><!--/Right Column -->
+<div id="popup_result" class="overlay">
+		<div class="popup">
+			<h2>Result</h2>
+			<a class="close" href="#">&times;</a>
+			<div class="content ">
+				<textarea class="gen_result" id="output" readonly></textarea>
+			</div>
+			<div>
+				<button onclick="save_file()">Save file</button>
+			</div>
+		</div>
+	</div>
+</div>		  
 
-	</div><!--/container-fluid-->
-	
-	
-    <!-- jQuery -->
-    <script src="js/jquery-1.11.3.min.js"></script>
-
-    <!-- Bootstrap Core JavaScript -->
-    <script src="js/bootstrap.min.js"></script>
-	
-	<!-- IE10 viewport bug workaround -->
-	<script src="js/ie10-viewport-bug-workaround.js"></script>
-	
-	<!-- Placeholder Images -->
-	<script src="js/holder.min.js"></script>
-	
+<script src="js/jquery-1.11.3.min.js"></script>
+<script src="js/bootstrap.bundle.min.js"></script>
+		
 </body>
 
 </html>
