@@ -16,7 +16,7 @@
 	<script src="../js/open_file.js"></script>
 	
 	<!-- Description and process js for selected tools --> 
-	<script src="../tools/connector_gen.js"></script>
+	<script src="../tools/module_gen.js"></script>
 	<script>			
 		window.onload = function () {
 			// Generate sidebar navigation
@@ -54,13 +54,13 @@
 							<p id="description"></p>
 						</div>
 						<div class="card-body">
-							<table><tr><th>Reference</th><td><input id="symbol_ref" type="text" value="A" width="3" size="3" readonly="true"></td></tr>
-							<tr><th>Symbol name</th><td><input id="symbol_name" type="text" value="RPI4 CM"></td></tr>
-							<tr><td>&nbsp;</td></tr>
 							<table>
-								<tr><th>Description</th><td><input style="width:100%;" id="symbol_desc" type="text" value="" size="90"></td></tr>	
-								<tr><th>Datasheet</th><td><input style="width:100%;" id="symbol_ds" type="text" size="90"></td></tr>
-							</table>
+								<tr><th>Symbol name</th><td><input id="symbol_name" type="text" value="RPI4 CM"></td></tr>
+								<tr><td>&nbsp;</td></tr>
+								<table>
+									<tr><th>Description</th><td><input style="width:100%;" id="symbol_desc" type="text" value="" size="90"></td></tr>	
+									<tr><th>Datasheet</th><td><input style="width:100%;" id="symbol_ds" type="text" size="90"></td></tr>
+								</table>
 							</table>
 						</div>
 						<div class="list-group">
