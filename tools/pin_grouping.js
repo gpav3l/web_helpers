@@ -1,4 +1,12 @@
 /*!
+ *  Call when page is load, can be use to generate description, additional init and etc.
+ */
+function onload_handler() {
+	document.getElementById("description").innerHTML = `Place in textarea list of pin in format: <b>pin_number pin_name pin_description</b><br>
+		Copy from right textarea sorted by group pins, or save into *.txt file.`		
+} 
+
+/*!
  * Parse raw input to pin number, pin name and pin description
  */
 function parse_input(raw_text) {

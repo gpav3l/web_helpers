@@ -1,45 +1,27 @@
+const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(PI|PO|IO|I|O)?.*?$');
+const func_name_regex = new RegExp('^\[\\t\\s\]*>\[\\t\\s\]*(\\S+)$');
+const y_init = -2.54
+const y_step = -5.08
+const pin_types ={"PO": "power_out", "PI":"power_in", "IO": "bidirectional", "I": "input", "O": "output"}
+		
 /*!
- * Print out file content into input textarea
+ *  Call when page is load, can be use to generate description, additional init and etc.
  */
-function dispFile(contents) {
-  document.getElementById('pin_list').innerHTML=contents
-}
-
-/*!
- * Catch file select
- */
-function clickElem(elem) {
-	var eventMouse = document.createEvent("MouseEvents")
-	eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-	elem.dispatchEvent(eventMouse)
-}
-
-/*!
- * Show open file dialog
- */
-function openFile(func) {
-	readFile = function(e) {
-		var file = e.target.files[0];
-		if (!file) {
-			return;
+function onload_handler() {
+	out_text = "empty - passive<br>"
+	for (var key in pin_types) {
+		if (pin_types.hasOwnProperty(key)) {           
+			out_text += `"${key}" - ${pin_types[key]}<br>`;
 		}
-		var reader = new FileReader();
-		reader.onload = function(e) {
-			var contents = e.target.result;
-			fileInput.func(contents)
-			document.body.removeChild(fileInput)
-		}
-		reader.readAsText(file)
 	}
-	fileInput = document.createElement("input")
-	fileInput.type='file'
-	fileInput.accept='.txt'
-	fileInput.style.display='none'
-	fileInput.onchange=readFile
-	fileInput.func=func
-	document.body.appendChild(fileInput)
-	clickElem(fileInput)
-}
+		
+	document.getElementById("pin_types_info").innerHTML = out_text
+	
+	document.getElementById("description").innerHTML = `Place in textarea list of pin in format: "pin_number pin_name [pin_type] [additional info]".<br> 
+								Place empty stroke and/or functional name (format: ">Functional name") in pin list to delimeter pin by group. Each group generate separete unit in symbol.<br>
+								After generation take text from popup and past it into necesary *.kicad_sym file, or use Save file button to save symbol in separate *.kicad_sym file.<br> 
+										`	
+} 
 
 /*! 
  * Parse text to pin list
