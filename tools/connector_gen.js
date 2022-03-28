@@ -17,6 +17,8 @@ function onload_handler() {
 		
 	document.getElementById("pin_types_info").innerHTML = out_text
 	
+	document.getElementById("page_header").innerHTML = "<h3>Connector generation</h3>"
+	
 	document.getElementById("description").innerHTML = `Place in textarea list of pin in format: "pin_number pin_name [pin_type] [additional info]".<br> 
 								Place empty stroke and/or functional name (format: ">Functional name") in pin list to delimeter pin by group. Each group generate separete unit in symbol.<br>
 								After generation take text from popup and past it into necesary *.kicad_sym file, or use Save file button to save symbol in separate *.kicad_sym file.<br> 

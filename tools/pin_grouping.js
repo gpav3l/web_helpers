@@ -2,6 +2,7 @@
  *  Call when page is load, can be use to generate description, additional init and etc.
  */
 function onload_handler() {
+	document.getElementById("page_header").innerHTML = "<h3>Pin sorting</h3>"
 	document.getElementById("description").innerHTML = `Place in textarea list of pin in format: <b>pin_number pin_name pin_description</b><br>
 		Copy from right textarea sorted by group pins, or save into *.txt file.`		
 } 
