@@ -86,5 +86,6 @@ function save_file() {
 		a.href = window.URL.createObjectURL(new Blob([document.getElementById("output").value], {type: "text/plain"}));
 		a.download = `pin_sorted.txt`;
 		a.click();
+		alert("File is saved as ".concat(a.download))
 	}
 };

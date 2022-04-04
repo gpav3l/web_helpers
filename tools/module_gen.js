@@ -2,6 +2,7 @@ const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(PI|
 const func_name_regex = new RegExp('^\[\\t\\s\]*>\[\\t\\s\]*(\\S+)$');
 const y_init = -2.54
 const y_step = -5.08
+const pin_length = 5.08
 const pin_types ={"PO": "power_out", "PI":"power_in", "IO": "bidirectional", "I": "input", "O": "output"}
 		
 /*!
@@ -134,24 +135,24 @@ function process(){
 					first_grp_pin[pin_name] = pos_y;
 				}else {
 					temp_y = first_grp_pin[pin_name].toFixed(3)
-					symbol_pins += `(pin  ${item["type"]} line (at 15.24 ${temp_y} 180) (length 5.08) hide`
-					symbol_pins += `(name "${item["label"]}" (effects (font (size 1.27 1.27)))) `
-					symbol_pins += `(number "${item["index"]}" (effects (font (size 1.27 1.27)))))\r\n`
+					symbol_pins += `(pin  ${item["type"]} line (at 15.1892 ${temp_y} 180) (length ${pin_length}) hide`
+					symbol_pins += `(name "${item["label"]}" (effects (font (size 2 2)))) `
+					symbol_pins += `(number "${item["index"]}" (effects (font (size 2 2)))))\r\n`
 					return;		
 				}
 			}
 			symbol_pins += `(text "${item["index"]}" (at 4.826 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
-			symbol_pins += `(text "${item["label"]}" (at -8.89 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
-			symbol_pins += `(pin ${item["type"]} line (at 15.24 ${pos_y.toFixed(3)} 180) (length 5.08) `
-			symbol_pins += `(name "${item["label"]}" (effects (font (size 1.27 1.27)))) `
-			symbol_pins += `(number "${item["index"]}" (effects (font (size 1.27 1.27)))))\r\n`		
+			symbol_pins += `(text "${item["label"]}" (at -10.16 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
+			symbol_pins += `(pin ${item["type"]} line (at 15.1892 ${pos_y.toFixed(3)} 180) (length ${pin_length}) `
+			symbol_pins += `(name "${item["label"]}" (effects (font (size 2 2)))) `
+			symbol_pins += `(number "${item["index"]}" (effects (font (size 2 2)))))\r\n`		
 			pos_y += y_step;
 			show_pin_count++;				
 		});
 		
 		symbol_pins += "(text \"Цепь\" (at -10.16 2.54 0)(effects (font (size 2 2))))\r\n"
 		if(pins["fname"] != "") {
-			symbol_pins += `(text "${pins["fname"]}" (at -3.81 ${show_pin_count*y_step+y_init} 0)(effects (font (size 2.0066 2.0066))))\r\n`
+			symbol_pins += `(text "${pins["fname"]}" (at -5.08 ${show_pin_count*y_step+y_init} 0)(effects (font (size 2 2))))\r\n`
 		}
 		
 		/* Lines generation */
@@ -171,6 +172,7 @@ function process(){
 	//location.href = "#popup_result";
 };
 
+
 /*!
  *  Save .kicad_sim file
  */
@@ -182,5 +184,6 @@ function save_file() {
 		a.href = window.URL.createObjectURL(new Blob([document.getElementById("output").value], {type: "text/plain"}));
 		a.download = `${document.getElementById("symbol_name").value}.kicad_sym`;
 		a.click();
+		alert("File is saved as ".concat(a.download))
 	}
 };
