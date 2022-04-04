@@ -197,6 +197,16 @@ function process(){
 };
 
 /*!
+ *  Update file name showen in popup window
+ */
+function  upd_poup_header() {
+	mod_name = document.getElementById("symbol_name").value;
+	mod_name = mod_name.replace(/\s/g, "_");
+	document.getElementById("file_name").innerHTML = `${mod_name}.kicad_sym`;
+};
+
+
+/*!
  *  Save .kicad_sim file
  */
 function save_file() {
@@ -205,7 +215,7 @@ function save_file() {
 	} else {
 		var a = document.createElement("a");
 		a.href = window.URL.createObjectURL(new Blob([document.getElementById("output").value], {type: "text/plain"}));
-		a.download = `${document.getElementById("symbol_name").value}.kicad_sym`;
+		a.download = `${document.getElementById("file_name").innerHTML}`;
 		a.click();
 		alert("File is saved as ".concat(a.download))
 	}

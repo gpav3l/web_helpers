@@ -178,7 +178,9 @@ function process(){
  *  Update file name showen in popup window
  */
 function  upd_poup_header() {
-	document.getElementById("file_name").innerHTML = `${document.getElementById("symbol_name").value}.kicad_sym`;
+	mod_name = document.getElementById("symbol_name").value;
+	mod_name = mod_name.replace(/\s/g, "_");
+	document.getElementById("file_name").innerHTML = `${mod_name}.kicad_sym`;
 };
 
 
