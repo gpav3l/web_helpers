@@ -11,6 +11,7 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/sidebars.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
+    <link href="css/icons.css" rel="stylesheet">
 	
 	<script src="js/page_gen_parts.js"></script>
 	<script src="js/open_file.js"></script>
@@ -87,21 +88,19 @@
 	  </div>
 	</nav>
 
-</div>
-
-<div id="popup_result" class="overlay">
+	<div id="popup_result" class="overlay">
 		<div class="popup">
-			<h2>Result</h2>
-			<a class="close" href="#">&times;</a>
-			<div class="content ">
+			<a class="save" href="#" onclick="save_file()"><span id="file_name" class="glyphicon glyphicon-save-file"></span></a>
+			<a class="close" href="#"><span class="glyphicon glyphicon-remove-circle"></span></a>
+			<div style="height: 100%" class="content">
 				<textarea class="gen_result" id="output" readonly></textarea>
-			</div>
-			<div>
-				<button onclick="save_file()">Save file</button>
 			</div>
 		</div>
 	</div>
+
 </div>		  
+
+
 
 <script src="js/jquery-1.11.3.min.js"></script>
 <script src="js/bootstrap.bundle.min.js"></script>

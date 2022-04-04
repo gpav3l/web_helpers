@@ -105,6 +105,8 @@ function is_id_duplicate(pins_list) {
  *  Main process for build kicad symbol structure
  */
 function process(){
+	upd_poup_header();
+	
 	pins_groups = get_parsed_pins(document.getElementById("pin_list").value);
 	symbl_name = document.getElementById("symbol_name").value;
 	is_gnd_concate = document.getElementById("is_gnd_concate").checked;
@@ -172,6 +174,13 @@ function process(){
 	//location.href = "#popup_result";
 };
 
+/*!
+ *  Update file name showen in popup window
+ */
+function  upd_poup_header() {
+	document.getElementById("file_name").innerHTML = `${document.getElementById("symbol_name").value}.kicad_sym`;
+};
+
 
 /*!
  *  Save .kicad_sim file
@@ -182,7 +191,7 @@ function save_file() {
 	} else {
 		var a = document.createElement("a");
 		a.href = window.URL.createObjectURL(new Blob([document.getElementById("output").value], {type: "text/plain"}));
-		a.download = `${document.getElementById("symbol_name").value}.kicad_sym`;
+		a.download = `${document.getElementById("file_name").innerHTML}`;
 		a.click();
 		alert("File is saved as ".concat(a.download))
 	}

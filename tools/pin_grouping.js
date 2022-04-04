@@ -64,6 +64,8 @@ function sort_by_name(list){
  *  Main process for build kicad symbol structure
  */
 function process(){
+	upd_poup_header();
+	
 	list = parse_input(document.getElementById("pin_list").value)
 	res_ouput = ""
 	
@@ -76,7 +78,15 @@ function process(){
 };
 
 /*!
- *  Save sorted pin to file
+ *  Update file name showen in popup window
+ */
+function  upd_poup_header() {
+	document.getElementById("file_name").innerHTML = `pin_sorted.txt`;
+};
+
+
+/*!
+ *  Save .kicad_sim file
  */
 function save_file() {
 	if(document.getElementById("output").value == "") {
@@ -84,7 +94,7 @@ function save_file() {
 	} else {
 		var a = document.createElement("a");
 		a.href = window.URL.createObjectURL(new Blob([document.getElementById("output").value], {type: "text/plain"}));
-		a.download = `pin_sorted.txt`;
+		a.download = `${document.getElementById("file_name").innerHTML}`;
 		a.click();
 		alert("File is saved as ".concat(a.download))
 	}

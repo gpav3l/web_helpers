@@ -119,6 +119,8 @@ function is_id_duplicate(pins_list) {
  *  Main process for build kicad symbol structure
  */
 function process(){
+	upd_poup_header();
+	
 	pins_groups = get_parsed_pins(document.getElementById("pin_list").value);
 	symbl_name = document.getElementById("symbol_name").value;
 	is_gnd_concate = document.getElementById("is_gnd_concate").checked;
