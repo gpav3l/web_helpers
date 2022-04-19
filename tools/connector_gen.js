@@ -140,7 +140,7 @@ function process(){
 					first_grp_pin[pin_name] = pos_y;
 				}else {
 					temp_y = first_grp_pin[pin_name].toFixed(3)
-					symbol_pins += `(pin  ${item["type"]} line (at 15.1892 ${temp_y} 180) (length ${pin_length}) hide`
+					symbol_pins += `(pin  ${item["type"]} line (at 15.24 ${temp_y} 180) (length ${pin_length}) hide`
 					symbol_pins += `(name "${item["label"]}" (effects (font (size 2 2)))) `
 					symbol_pins += `(number "${item["index"]}" (effects (font (size 2 2)))))\r\n`
 					return;		
@@ -148,7 +148,7 @@ function process(){
 			}
 			symbol_pins += `(text "${item["index"]}" (at 4.826 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
 			symbol_pins += `(text "${item["label"]}" (at -10.16 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
-			symbol_pins += `(pin ${item["type"]} line (at 15.1892 ${pos_y.toFixed(3)} 180) (length ${pin_length}) `
+			symbol_pins += `(pin ${item["type"]} line (at 15.24 ${pos_y.toFixed(3)} 180) (length ${pin_length}) `
 			symbol_pins += `(name "${item["label"]}" (effects (font (size 2 2)))) `
 			symbol_pins += `(number "${item["index"]}" (effects (font (size 2 2)))))\r\n`		
 			pos_y += y_step;
@@ -195,7 +195,7 @@ function save_file() {
 		alert("Output is empty")
 	} else {
 		var a = document.createElement("a");
-		a.href = window.URL.createObjectURL(new Blob([document.getElementById("output").value], {type: "text/plain"}));
+		a.href = window.URL.createObjectURL(new Blob(["(kicad_symbol_lib (version 20211014) (generator kicad_symbol_editor)" + document.getElementById("output").value + ")"], {type: "text/plain"}));
 		a.download = `${document.getElementById("file_name").innerHTML}`;
 		a.click();
 		alert("File is saved as ".concat(a.download))
