@@ -108,7 +108,7 @@ function process(){
 	upd_poup_header();
 	
 	pins_groups = get_parsed_pins(document.getElementById("pin_list").value);
-	symbl_name = document.getElementById("symbol_name").value;
+	symbl_name = document.getElementById("symbol_name").value.replace(/\s/g, "_");;
 	is_gnd_concate = document.getElementById("is_gnd_concate").checked;
 	
 	if((dupl_id = is_id_duplicate(pins_groups)) != "") {
