@@ -110,10 +110,12 @@
         </div>
       </div>
     </div>
-    <nav class="navbar fixed-bottom navbar-light bg-light">
+    <nav class="navbar fixed-bottom navbar-light">
       <div class="container-fluid">
-        <button class="nav-link button" onclick="openFile(dispFile)">Load</button>
-        <a class="nav-link button" href="#popup_result" onclick="process()">Generate</a>
+        <ul class="nav nav-pills">
+          <li class="nav-item"> <button class="active nav-link" onclick="openFile(dispFile)">Load</button> </li>
+          <li class="nav-item"> <a class="nav-link mx-4 border border-primary bg-primary text-light" href="#popup_result" onclick="process()" >Generate </a></li>
+        </ul>
       </div>
     </nav>
     <div id="popup_result" class="overlay">
