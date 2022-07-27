@@ -16,7 +16,7 @@
 	<script src="../js/open_file.js"></script>
 	
 	<!-- Description and process js for selected tools --> 
-	<script src="../tools/connector_gen.js"></script>
+	<script src="../tools/ic_gen.js"></script>
     <script> window.onload = function() {
         // Generate sidebar navigation
         gen_page_content();
@@ -52,11 +52,14 @@
                 <div class="card-body">
                     <table>
                         <tr><th >Reference</th>
-                            <td><input id="xp_ref" type="radio" name="sort_type" checked="checked">XP
-                                <input id="xs_ref" type="radio" name="sort_type">XS
+                            <td>
+                                <input id="da_ref" type="radio" name="sort_type" checked="checked">DA
+                                &nbsp;
+                                <input id="dd_ref" type="radio" name="sort_type">DD
                             </td>
                         </tr>
-                        <tr><th>Name</th><td><input id="symbol_name" type="text" value="Connector"></td></tr>
+                        <tr><th>Name</th><td><input id="symbol_name" type="text" value="IC"></td></tr>
+                        <tr><th>Type</th><td><input id="symbol_type" type="text" value="*STU"></td></tr>
                         <tr><td>&nbsp;</td></tr>
                         <table>
                             <tr><th>Description</th><td><input style="width:100%;" id="symbol_desc" type="text" value="" size="90"></td></tr>	
@@ -64,26 +67,22 @@
                         </table>
                     </table>
                 </div>
-                <div class="list-group">
+                <!--<div class="list-group">
                     <list>
                     <ul><input id="is_gnd_concate" type="checkbox"> Show only one GND pins (hide other)</ul>
                     </list>
-                </div>
+                </div>-->
                 <div class="card-body">
                   <textarea class="data_input" id="pin_list" rows="40" cols="80">
->Test
-1 GND PI Ground pin
-2 VCC PI Power pin
-3 GPIO IO Digital Input/Output 1
-5 GND PI Ground pin
-
->Functional
-4 GPIO IO
-10 AGND PI
-6 VCC PI
-7 AVCC PI
-8 AGND PI
-                  </textarea>
+>
+5 VIN PI
+4 nSD I
+1 GND PI
+<
+2 VOUT PO
+6 CP+
+3 CP-
+</textarea>
                 </div>
               </div>
             </div>
@@ -93,7 +92,7 @@
               <div class="card">
                 <div class="card-header"> Tips </div>
                 <div class="card-body">
-                  <img style="max-width:100%;max-height:100%;" src="../images/conn_gen_tips.png" alt="Tips image">
+                  <img style="max-width:100%;max-height:100%;" src="../images/ic_gen_tips.png" alt="Tips image">
                 </div>
                 
                 <div class="card-header">

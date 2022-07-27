@@ -1,72 +1,67 @@
 <!DOCTYPE html>
-<!-- Template by Quackit.com -->
-<html lang="en">
+<html>
+
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <title>KiCAD helper</title>
-
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <link href="css/sidebars.css" rel="stylesheet">
     <link href="css/custom.css" rel="stylesheet">
     <link href="css/icons.css" rel="stylesheet">
-	
-	<script src="js/page_gen_parts.js"></script>
+    
+    <title>KiCAD helper</title>
+    
+    <script src="js/page_gen_parts.js"></script>
 	<script src="js/open_file.js"></script>
 	
 	<!-- Description and process js for selected tools --> 
 	<script src="tools/pin_grouping.js"></script>
-	<script>	
-		window.onload = function () {
-			// Generate sidebar navigation
-			gen_page_content();
-			// Generate descriptiopn
-			onload_handler();			
-		};	
-	</script>	
-	
+    <script> window.onload = function() {
+        // Generate sidebar navigation
+        gen_page_content();
+        // Tips and description
+        onload_handler();
+    };
+    </script>
 </head>
 
 <body>
-	
-<div class="container-fluid">
-	<div class="row" > 
-		<!-- Sidebar -->
-		<div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px;">
-			<h6>Tools select</h6>
-			<ul id="page_list" class="nav nav-pills flex-column mb-auto">
-			</ul>
-		</div>
-		
-		<!-- Main content -->
-		<div class="col-sm-9">
-			<div class="row">
-				<div class="col-sm-8">
-					<div class="card">
-						<div class="card-header">
-							<p id="page_header"></p>
-						 </div>
-						<div class="card-body">
-							<p id="description"></p>
-						</div>
-						<div class="card-header">
-							<h3>Options</h3>
-						 </div>
-						<div class="card-body">
-							<table>
-								<tr><th>Name</th><td><input id="symbol_name" type="text" value="IC pin sort"></td></tr>
-							</table>
-						</div>
-						<div class="list-group">
-							<list>
-							<ul><input id="sort_by_info" type="radio" name="sort_type" checked="checked">Sort by pin description</ul>
-							<ul><input id="sort_by_name" type="radio" name="sort_type">Sort by pin name</ul>
-							</list>
-						</div>
-						<div class="card-body">
-<textarea class="data_input" id="pin_list" rows="40" cols="80">
+  <div class="py-5">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-header"><h4>Tools select</h4></div>
+                <div class="card-body"><ul id="page_list" class="nav nav-pills flex-column mb-auto"></ul></div>
+            </div>
+        </div>
+        <div class="col-md-10">
+          <div class="row">
+            <div class="col-sm-8">
+              <div class="card">
+                <div class="card-header">
+                  <p id="page_header"></p>
+                </div>
+                <div class="card-body">
+                  <p id="description"></p>
+                </div>
+                <div class="card-header">
+                  <h3>Options</h3>
+                </div>
+                <div class="card-body">
+                    <table>
+                        <tr><th>Name</th><td><input id="symbol_name" type="text" value="IC pin sort"></td></tr>
+                    </table>
+                </div>
+                <div class="list-group">
+                    <list>
+                    <ul><input id="sort_by_info" type="radio" name="sort_type" checked="checked">Sort by pin description</ul>
+                    <ul><input id="sort_by_name" type="radio" name="sort_type">Sort by pin name</ul>
+                    </list>
+                </div>
+                <div class="card-body">
+                  <textarea class="data_input" id="pin_list" rows="40" cols="80">
 1 GND Ground pin
 2 VCC Power pin
 3 GPIO Digital Input/Output 1
@@ -75,48 +70,52 @@
 6 VCC Power pin
 7 AVCC Analog power rail
 8 AGND Analog power rail
-</textarea>
-						</div>
-			
-					</div>
-				</div>
-			
-			<!--<div class="col-sm-3">
-					
-			</div>-->
-				
-			</div>
-		</div>
-	</div>
-	
-	<div class="row">
-	<p>Kevin Spacer<br/><br/></p>
-	</div>
-	
-	<nav class="navbar fixed-bottom navbar-light bg-light">
-	  <div class="container-fluid">
-		<button class="nav-link button" onclick="openFile(dispFile)">Load</button>
-		<a class="nav-link button" href="#popup_result" onclick="process()">Generate</a>
-	  </div>
-	</nav>
+                  </textarea>
+                </div>
+              </div>
+            </div>
+            
+             <!-- Right sidebar -->
+            <!--<div class="col-sm-4">
+              <div class="card">
+                <div class="card-header"> Tips </div>
+                <div class="card-body">
+                  <img style="max-width:100%;max-height:100%;" src="../images/conn_gen_tips.png" alt="Tips image">
+                </div>
+                
+                <div class="card-header">
+                  <h6 class="panel-title"><span class="glyphicon glyphicon-cog"></span> Avaible pin types</h6>
+                </div>
+                <div class="card-body">
+                  <p id="pin_types_info"></p>
+                </div>
+              </div>
+            </div>
+            -->
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="navbar fixed-bottom navbar-light bg-light">
+      <div class="container-fluid">
+        <button class="nav-link button" onclick="openFile(dispFile)">Load</button>
+        <a class="nav-link button" href="#popup_result" onclick="process()">Generate</a>
+      </div>
+    </nav>
+    <div id="popup_result" class="overlay">
+      <div class="popup">
+        <a class="save" href="#" onclick="save_file()"><span id="file_name" class="glyphicon glyphicon-save-file"></span></a>
+        <a class="close" href="#"><span class="glyphicon glyphicon-remove-circle"></span></a>
+        <div style="height: 100%" class="content">
+          <textarea class="gen_result" id="output" readonly=""></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="js/jquery-1.11.3.min.js"></script>
+  <script src="js/bootstrap.bundle.min.js"></script>
 
-	<div id="popup_result" class="overlay">
-		<div class="popup">
-			<a class="save" href="#" onclick="save_file()"><span id="file_name" class="glyphicon glyphicon-save-file"></span></a>
-			<a class="close" href="#"><span class="glyphicon glyphicon-remove-circle"></span></a>
-			<div style="height: 100%" class="content">
-				<textarea class="gen_result" id="output" readonly></textarea>
-			</div>
-		</div>
-	</div>
-
-</div>		  
-
-
-
-<script src="js/jquery-1.11.3.min.js"></script>
-<script src="js/bootstrap.bundle.min.js"></script>
-		
 </body>
 
 </html>

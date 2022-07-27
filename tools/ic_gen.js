@@ -1,45 +1,31 @@
+const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(PI|PO|IO|I|O)?.*?$');
+const func_name_regex = new RegExp('^\[\\t\\s\]*>\[\\t\\s\]*(\\S+)$');
+const y_init = -2.54
+const y_step = -5.08
+const pin_length = 5.08
+const pin_types ={"PO": "power_out", "PI":"power_in", "IO": "bidirectional", "I": "input", "O": "output"}
+		
 /*!
- * Print out file content into input textarea
+ *  Call when page is load, can be use to generate description, additional init and etc.
  */
-function dispFile(contents) {
-  document.getElementById('pin_list').innerHTML=contents
-}
-
-/*!
- * Catch file select
- */
-function clickElem(elem) {
-	var eventMouse = document.createEvent("MouseEvents")
-	eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-	elem.dispatchEvent(eventMouse)
-}
-
-/*!
- * Show open file dialog
- */
-function openFile(func) {
-	readFile = function(e) {
-		var file = e.target.files[0];
-		if (!file) {
-			return;
+function onload_handler() {
+	out_text = "empty - passive<br>"
+	for (var key in pin_types) {
+		if (pin_types.hasOwnProperty(key)) {           
+			out_text += `"${key}" - ${pin_types[key]}<br>`;
 		}
-		var reader = new FileReader();
-		reader.onload = function(e) {
-			var contents = e.target.result;
-			fileInput.func(contents)
-			document.body.removeChild(fileInput)
-		}
-		reader.readAsText(file)
 	}
-	fileInput = document.createElement("input")
-	fileInput.type='file'
-	fileInput.accept='.txt'
-	fileInput.style.display='none'
-	fileInput.onchange=readFile
-	fileInput.func=func
-	document.body.appendChild(fileInput)
-	clickElem(fileInput)
-}
+		
+	document.getElementById("pin_types_info").innerHTML = out_text
+	
+	document.getElementById("page_header").innerHTML = "<h3>IC generation</h3>"
+		
+	document.getElementById("description").innerHTML = "Under construction"
+	//`Place in textarea list of pin in format: "pin_number pin_name [pin_type] [additional info]".<br> 
+	//							Place empty stroke and/or functional name (format: ">Functional name") in pin list to delimeter pin by group. Each group generate separete unit in symbol.<br>
+	//							After generation take text from popup and past it into necesary *.kicad_sym file, or use Save file button to save symbol in separate *.kicad_sym file.<br>`
+									
+} 
 
 /*! 
  * Parse text to pin list
@@ -47,32 +33,33 @@ function openFile(func) {
 function get_parsed_pins(raw_list){		
 	sort_list = []
 	sub_list = []
-	pin_angel = 0;
+	func_name = "";
 	
 	lines = raw_list.split("\n")
 	
 	lines.forEach(function (item, index) {
-		if(item.match(new RegExp('^\[\\t\\s\]*$'))) {
-			pin_angel = 0;
+		if(item.match(new RegExp('^\[\\t\\s\]*$')) | (item.match(func_name_regex) != null)) {
 			if(sub_list.length != 0) { 
-				sort_list.push({pin_list: sub_list});
-				sub_list = [];
+				sort_list.push({fname: func_name, pin_list: sub_list});
+				sub_list = []
 			}
+		
+			if(item.match(func_name_regex) != null) { 
+				func_name = func_name_regex.exec(item)[1];
+			} else {
+				func_name = "";
+			}				
 		} else {
 			if (item.match(pin_regex) != null) {
 				pin_type = "passive"
 				temp = pin_regex.exec(item)
-				if(temp[1] == ">") pin_angel = 180;
-				else pin_angel = 0;
 				if(temp[3] !== undefined) pin_type = pin_types[temp[3]]
-				sub_list.push({"index":temp[1], "label":temp[2], "type":pin_type, "angel":pin_angel})
-			} else if (item.match(angel_regex) != null) {
-				pin_angel = 180;
+				sub_list.push({"index":temp[1], "label":temp[2], "type":pin_type})
 			}
 		}
 	});
 	
-	if(sub_list.length != 0) sort_list.push({pin_list: sub_list});
+	if(sub_list.length != 0) sort_list.push({fname: func_name, pin_list: sub_list});
 	
 	return sort_list;
 };
@@ -81,15 +68,15 @@ function get_parsed_pins(raw_list){
 *  Generate symbol property
 */
 function symbol_property_gen() {
-	sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -11.43, pos_y: 12.7, font: 2},
-	{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: 3.81, pos_y: 12.7, font: 2},
-	{prop: "Footprint", value: "", pos_x: 0, pos_y: 21.59, font: 2},
-	{prop: "Datasheet", value: document.getElementById("symbol_ds").value, pos_x: 2.54, pos_y: 17.78, font: 2},
-	{prop: "ki_locked", value: "", pos_x: 0, pos_y: 0, font: 2},
-	{prop: "ki_keywords", value: "", pos_x: 0, pos_y: 0, font: 2},
-	{prop: "ki_description", value: document.getElementById("symbol_desc").value, pos_x: 0, pos_y: 0, font: 2},
+	sym_prop = [{prop: "Reference", value: "A", pos_x: -19.05, pos_y: 7.62, font: 2},
+	{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: -2.54, pos_y: 7.62, font: 2},
+	{prop: "Footprint", value: "", pos_x: 20.32, pos_y: 7.62, font: 2},
+	{prop: "Datasheet", value: document.getElementById("symbol_ds").value, pos_x: -2.54, pos_y: 21.59, font: 1.27},
+	{prop: "ki_locked", value: "", pos_x: 0, pos_y: 0, font: 1.27},
+	{prop: "ki_keywords", value: "", pos_x: 0, pos_y: 0, font: 1.27},
+	{prop: "ki_description", value: document.getElementById("symbol_desc").value, pos_x: 0, pos_y: 0, font: 1.27},
 	]
-			
+	
 	return_text = "";
 	sym_prop.forEach(function (item, index) {
 		return_text += `(property "${item["prop"]}" "${item["value"]}" (id ${index}) `;
@@ -120,7 +107,7 @@ function is_id_duplicate(pins_list) {
  */
 function process(){
 	upd_poup_header();
-	
+	return;
 	pins_groups = get_parsed_pins(document.getElementById("pin_list").value);
 	symbl_name = document.getElementById("symbol_name").value.replace(/\s/g, "_");;
 	is_gnd_concate = document.getElementById("is_gnd_concate").checked;
@@ -131,7 +118,7 @@ function process(){
 		return;
 	}
 	// Symbol header
-	symbol_text	= `(symbol "${symbl_name}" (pin_names (offset 1.016)) (in_bom yes) (on_board yes)\r\n`
+	symbol_text	= `(symbol "${symbl_name}" (pin_numbers hide) (pin_names hide) (in_bom yes) (on_board yes)\r\n`
 	
 	symbol_text	+= symbol_property_gen();
 	
@@ -151,15 +138,15 @@ function process(){
 					first_grp_pin[pin_name] = pos_y;
 				}else {
 					temp_y = first_grp_pin[pin_name].toFixed(3)
-					symbol_pins += `(pin  ${item["type"]} line (at 15.24 ${temp_y} ${item["angel"]) (length 5.08) hide`
+					symbol_pins += `(pin  ${item["type"]} line (at 15.24 ${temp_y} 180) (length ${pin_length}) hide`
 					symbol_pins += `(name "${item["label"]}" (effects (font (size 2 2)))) `
 					symbol_pins += `(number "${item["index"]}" (effects (font (size 2 2)))))\r\n`
 					return;		
 				}
 			}
 			symbol_pins += `(text "${item["index"]}" (at 4.826 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
-			symbol_pins += `(text "${item["label"]}" (at -8.89 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
-			symbol_pins += `(pin ${item["type"]} line (at 15.24 ${pos_y.toFixed(3)} ${item["angel"]) (length 5.08) `
+			symbol_pins += `(text "${item["label"]}" (at -10.16 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
+			symbol_pins += `(pin ${item["type"]} line (at 15.24 ${pos_y.toFixed(3)} 180) (length ${pin_length}) `
 			symbol_pins += `(name "${item["label"]}" (effects (font (size 2 2)))) `
 			symbol_pins += `(number "${item["index"]}" (effects (font (size 2 2)))))\r\n`		
 			pos_y += y_step;
@@ -168,20 +155,12 @@ function process(){
 		
 		symbol_pins += "(text \"Цепь\" (at -10.16 2.54 0)(effects (font (size 2 2))))\r\n"
 		if(pins["fname"] != "") {
-			symbol_pins += `(text "${pins["fname"]}" (at -3.81 ${show_pin_count*y_step+y_init} 0)(effects (font (size 2.0066 2.0066))))\r\n`
+			symbol_pins += `(text "${pins["fname"]}" (at -5.08 ${show_pin_count*y_step+y_init} 0)(effects (font (size 2 2))))\r\n`
 		}
 		
 		/* Lines generation */
-		/*
-		(rectangle (start -12.7 10.16) (end 12.7 -10.16) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type background)))
-		(polyline (pts (xy 5.08 10.16) (xy 5.08 -10.16))
-		(polyline (pts (xy -5.08 10.16) (xy -5.08 -10.16))
-		(stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none))))
-		(stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))
-		(text "*STU" (at 0 5.08 0) (effects (font (size 2.0066 2.0066))))
-		*/
 		symbol_lines = `(symbol "${symbl_name}_${index+1}_0"\r\n`
-		symbol_lines += `(rectangle (start -12.7 -3.81) (end 12.7 ${y_step*show_pin_count}) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
+		symbol_lines += `(rectangle (start -20.32 5.08) (end 10.16 ${y_step*show_pin_count}) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
 		
 		for (i=0; ; i+=y_step) { 
 			symbol_lines += `(polyline (pts(xy -20.32 ${i}) (xy 10.16 ${i.toFixed(3)})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
@@ -192,7 +171,7 @@ function process(){
 		
 		symbol_text += symbol_lines + symbol_pins + ")\r\n";
 	});
-	document.getElementById("output").value = "Sorry not work."//symbol_text + ")";
+	document.getElementById("output").value = symbol_text + ")";
 	//location.href = "#popup_result";
 };
 
@@ -214,7 +193,7 @@ function save_file() {
 		alert("Output is empty")
 	} else {
 		var a = document.createElement("a");
-		a.href = window.URL.createObjectURL(new Blob([document.getElementById("output").value], {type: "text/plain"}));
+		a.href = window.URL.createObjectURL(new Blob(["(kicad_symbol_lib (version 20211014) (generator kicad_symbol_editor)" + document.getElementById("output").value + ")"], {type: "text/plain"}));
 		a.download = `${document.getElementById("file_name").innerHTML}`;
 		a.click();
 		alert("File is saved as ".concat(a.download))
