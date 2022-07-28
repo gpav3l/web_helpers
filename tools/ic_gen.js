@@ -112,12 +112,17 @@ function symbol_property_gen() {
 function is_id_duplicate(pins_list) {
 	result = "";
 	id_dict = {};
-	pins_list.forEach(function(list) {
-		list["pin_list"].forEach(function(item) {
-			if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
-			else result = item["index"];
-		});
-	});
+    for (const [key, value] of Object.entries(pins_groups)) {
+        pins_groups[key]["rside_pins"].forEach(function(item) {
+ 			if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
+ 			else result = item["index"];
+ 		});
+        pins_groups[key]["lside_pins"].forEach(function(item) {
+ 			if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
+ 			else result = item["index"];
+ 		});
+    }
+   a
 	return result;
 }
 
@@ -142,7 +147,10 @@ function process(){
 	symbol_text	+= symbol_property_gen();
 	
 	// Unit generation
-// 	pins_groups.forEach(function(pins, index) {
+ 	//pins_groups.forEach(function(pins, index) {
+    for (const [key, value] of Object.entries(pins_groups)) {
+        console.log(key, value);
+    }
 // 		show_pin_count = 0
 // 		first_grp_pin = {}
 // 		Text and pins generation
@@ -189,7 +197,7 @@ function process(){
 // 		symbol_lines +=`(polyline (pts(xy 0 5.08) (xy 0 ${y_step*show_pin_count})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none))))\r\n`
 // 		
 // 		symbol_text += symbol_lines + symbol_pins + ")\r\n";
-// 	});
+ 	//});
 	document.getElementById("output").value = symbol_text + ")";
 };
 
