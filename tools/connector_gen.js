@@ -1,5 +1,5 @@
-const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(PI|PO|IO|I|O)?.*?$');
-const func_name_regex = new RegExp('^\[\\t\\s\]*>\[\\t\\s\]*(\\S+)$');
+const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]*(\\S+)?\[\\t\\s\]*(PI|PO|IO|I|O|P)?.*?$');
+const func_name_regex = new RegExp('^\[\\t\\s\]*>\[\\t\\s\]*(.*)$');
 const y_init = -2.54
 const y_step = -5.08
 const pin_length = 5.08
@@ -9,13 +9,14 @@ const pin_types ={"PO": "power_out", "PI":"power_in", "IO": "bidirectional", "I"
  *  Call when page is load, can be use to generate description, additional init and etc.
  */
 function onload_handler() {
-	out_text = "empty - passive<br>"
+	out_text = "empty or \"P\" - passive<br>"
 	for (var key in pin_types) {
 		if (pin_types.hasOwnProperty(key)) {           
 			out_text += `"${key}" - ${pin_types[key]}<br>`;
 		}
 	}
-		
+	pin_types["P"] = "passive";
+    
 	document.getElementById("pin_types_info").innerHTML = out_text
 	
 	document.getElementById("page_header").innerHTML = "<h3>Connector generation</h3>"
@@ -51,9 +52,17 @@ function get_parsed_pins(raw_list){
 		} else {
 			if (item.match(pin_regex) != null) {
 				pin_type = "passive"
+                label = ""
 				temp = pin_regex.exec(item)
-				if(temp[3] !== undefined) pin_type = pin_types[temp[3]]
-				sub_list.push({"index":temp[1], "label":temp[2], "type":pin_type})
+                if(temp[2] !== undefined) {
+                    if((temp[2] in pin_types) & !(temp[3] in pin_types))
+                        pin_type = pin_types[temp[2]]
+                    else
+                        label = temp[2]
+                }
+                if(temp[3] !== undefined) pin_type = pin_types[temp[3]]
+                    
+				sub_list.push({"index":temp[1], "label":label, "type":pin_type})
 			}
 		}
 	});
