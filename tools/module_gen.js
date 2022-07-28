@@ -1,5 +1,5 @@
 const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(PI|PO|IO|I|O)?.*?$');
-const func_name_regex = new RegExp('^\[\\t\\s\]*>\[\\t\\s\]*(\\S+)$');
+const func_name_regex = new RegExp('^\[\\t\\s\]*>\[\\t\\s\]*(.*)$');
 const y_init = -2.54
 const y_step = -5.08
 const pin_length = 5.08
