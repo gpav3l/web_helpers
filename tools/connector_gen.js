@@ -76,10 +76,7 @@ function get_parsed_pins(raw_list){
 *  Generate symbol property
 */
 function symbol_property_gen() {
-	if(document.getElementById("xp_ref").checked) ref_text="XP"
-	else ref_text="XS"
-	
-	sym_prop = [{prop: "Reference", value: ref_text, pos_x: -17.78, pos_y: 7.62, font: 2},
+	sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -17.78, pos_y: 7.62, font: 2},
 	{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: 2.54, pos_y: 7.62, font: 2},
 	{prop: "Footprint", value: "", pos_x: 20.32, pos_y: 7.62, font: 2},
 	{prop: "Datasheet", value: document.getElementById("symbol_ds").value, pos_x: -2.54, pos_y: 21.59, font: 1.27},

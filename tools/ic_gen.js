@@ -29,6 +29,15 @@ function onload_handler() {
 									
 } 
 
+/*!
+ *  Update file name showen in popup window
+ */
+function  upd_poup_header() {
+	mod_name = document.getElementById("symbol_name").value;
+	mod_name = mod_name.replace(/\s/g, "_");
+	document.getElementById("file_name").innerHTML = `${mod_name}.kicad_sym`;
+};
+
 /*! 
  * Parse text to pin list
  */
@@ -84,10 +93,30 @@ function get_parsed_pins(raw_list) {
 };
 
 /*!
+ *	Check pin to duplicate
+ */
+function is_id_duplicate(pins_list) {
+	result = "";
+	id_dict = {};
+    for (const [key, value] of Object.entries(pins_groups)) {
+        pins_groups[key]["rside_pins"].forEach(function(item) {
+ 			if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
+ 			else result = item["index"];
+ 		});
+        pins_groups[key]["lside_pins"].forEach(function(item) {
+ 			if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
+ 			else result = item["index"];
+ 		});
+    }
+
+	return result;
+}
+
+/*!
 *  Generate symbol property
 */
 function symbol_property_gen() {
-	sym_prop = [{prop: "Reference", value: "A", pos_x: -19.05, pos_y: 7.62, font: 2},
+	sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -19.05, pos_y: 7.62, font: 2},
 	{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: -2.54, pos_y: 7.62, font: 2},
 	{prop: "Footprint", value: "", pos_x: 20.32, pos_y: 7.62, font: 2},
 	{prop: "Datasheet", value: document.getElementById("symbol_ds").value, pos_x: -2.54, pos_y: 21.59, font: 1.27},
@@ -107,33 +136,52 @@ function symbol_property_gen() {
 }
 
 /*!
- *	Check pin to duplicate
+ * Based on pins list, calc size of body, placment for vertical lines, and etc.
  */
-function is_id_duplicate(pins_list) {
-	result = "";
-	id_dict = {};
-    for (const [key, value] of Object.entries(pins_groups)) {
-        pins_groups[key]["rside_pins"].forEach(function(item) {
- 			if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
- 			else result = item["index"];
- 		});
-        pins_groups[key]["lside_pins"].forEach(function(item) {
- 			if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
- 			else result = item["index"];
- 		});
-    }
-   a
-	return result;
-}
+function calc_body_size(symbol_type, pins_lists) {
+    ret_dic = {"body_length": 0, "body_width": 0, "left_line": 0, "right_line": 0};
+    
+    left_length = 0;
+    rigth_length = 0;
+    middle_length = 1.8 * symbol_type.length;
+    
+    pins_lists["rside_pins"].forEach(function(item) {
+        if(item["label"].length*1.6 > rigth_length) rigth_length = item["label"].length*1.6;
+    });
+    
+    pins_lists["lside_pins"].forEach(function(item) {
+        if(item["label"].length*1.6 > left_length) left_length = item["label"].length*1.6;   
+    });
+    
+    
+    
+    return ret_dic;
+};
+
+/*!
+ * Generate text description for body (text and lines)
+ */
+function generate_body(fname, symbl_type, body_size) {
+   return "";
+};
+
+/*!
+ * Generate text description for pins
+ */
+function pins_placer(pins_lists) {
+   return ""; 
+};
 
 /*!
  *  Main process for build kicad symbol structure
  */
 function process(){
-	upd_poup_header();
+	sub_index = 1;
+    upd_poup_header();
 
 	pins_groups = get_parsed_pins(document.getElementById("pin_list").value);
-	symbl_name = document.getElementById("symbol_name").value.replace(/\s/g, "_");;
+	symbl_name = document.getElementById("symbol_name").value.replace(/\s/g, "_");
+    symbl_type = document.getElementById("symbol_type").value.toUpperCase();
 	//is_gnd_concate = document.getElementById("is_gnd_concate").checked;
 	
 	if((dupl_id = is_id_duplicate(pins_groups)) != "") {
@@ -149,7 +197,25 @@ function process(){
 	// Unit generation
  	//pins_groups.forEach(function(pins, index) {
     for (const [key, value] of Object.entries(pins_groups)) {
-        console.log(key, value);
+        // Skip if both list is empty
+        if( (pins_groups[key]["rside_pins"].length == 0) && (pins_groups[key]["lside_pins"].length == 0))
+            continue;
+                
+        // Calculate size of rectangel
+        body_sizes = calc_body_size(symbl_type, pins_groups[key]);
+        
+        // Plot rectangle with texts
+        symbol_text += `(symbol "${symbl_name}_${sub_index}_0"\r\n`
+        symbol_text += generate_body(key, symbl_type, body_sizes);
+        symbol_text += `)\r\n`
+        
+        // Place pins
+        symbol_text += `(symbol "${symbl_name}_${sub_index}_1"\r\n`
+        symbol_text += pins_placer(pins_groups[key]);
+        symbol_text += `)\r\n`
+        
+        sub_index += 1;
+        
     }
 // 		show_pin_count = 0
 // 		first_grp_pin = {}
@@ -200,16 +266,6 @@ function process(){
  	//});
 	document.getElementById("output").value = symbol_text + ")";
 };
-
-/*!
- *  Update file name showen in popup window
- */
-function  upd_poup_header() {
-	mod_name = document.getElementById("symbol_name").value;
-	mod_name = mod_name.replace(/\s/g, "_");
-	document.getElementById("file_name").innerHTML = `${mod_name}.kicad_sym`;
-};
-
 
 /*!
  *  Save .kicad_sim file
