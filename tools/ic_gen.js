@@ -11,10 +11,10 @@ const pin_types ={"PO": "power_out", "PI":"power_in", "IO": "bidirectional", "I"
  *  Calculate length of pins label 
  */
 function pin_label_length(label) {
-    const font_width = font_size + 0.2
+    const font_width = font_size + 0.5
     
-    if(label.length <= 2) 
-        return label.length*font_width;
+    if(label.length < 2) 
+        return font_width*3;
     
     if(label.substring(0,2).toUpperCase() == "N_")
         return (label.length-2)*font_width;
@@ -192,6 +192,7 @@ function calc_body_size(symbol_type, pins_lists) {
         if(item["index"] == "---") body_length += grid;
         else body_length += grid*2.0;
     });
+    //ret_dic["right_width"] += grid
     
     ret_dic["body_length"] = body_length;
     
@@ -202,6 +203,7 @@ function calc_body_size(symbol_type, pins_lists) {
         if(item["index"] == "---") body_length += grid;
         else body_length += grid*2.0; 
     });
+    //ret_dic["left_width"] += grid
     
     if(body_length > ret_dic["body_length"])
         ret_dic["body_length"] = body_length;
@@ -253,7 +255,7 @@ function pins_placer(pins_lists, body_size) {
             y_pos += grid/2.0;
         } else {
             y_pos += grid;
-            text += `(pin passive line (at ${line_x_start+pin_length} -${y_pos} 180) (length ${pin_length}) 
+            text += `(pin ${item["type"]} line (at ${line_x_start+pin_length} -${y_pos} 180) (length ${pin_length}) 
                     (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                     (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
             y_pos += grid;        
@@ -271,7 +273,7 @@ function pins_placer(pins_lists, body_size) {
             y_pos += grid/2.0;
         } else {
             y_pos += grid;
-            text += `(pin passive line (at -${line_x_start + pin_length} -${y_pos} 0) (length ${pin_length}) 
+            text += `(pin ${item["type"]} line (at -${line_x_start + pin_length} -${y_pos} 0) (length ${pin_length}) 
                     (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                     (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
             y_pos += grid;        
