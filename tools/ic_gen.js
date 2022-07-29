@@ -2,11 +2,50 @@ const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(PI|
 const func_name_regex = new RegExp('^\[\\t\\s\]*(>|<)\[\\t\\s\]*(\\S+)$');
 const pin_group_regex = new RegExp('^---\[\\t\\s\]*$');
 
-const y_init = -2.54
-const y_step = -5.08
-const pin_length = 5.08
-const pin_types ={"PO": "power_out", "PI":"power_in", "IO": "bidirectional", "I": "input", "O": "output"}
-		
+const grid = 2.54;
+const font_size = 2;
+const pin_length = 5.08;
+const pin_types ={"PO": "power_out", "PI":"power_in", "IO": "bidirectional", "I": "input", "O": "output"};
+
+/*!
+ *  Calculate length of pins label 
+ */
+function pin_label_length(label) {
+    const font_width = font_size + 0.2
+    
+    if(label.length <= 2) 
+        return label.length*font_width;
+    
+    if(label.substring(0,2).toUpperCase() == "N_")
+        return (label.length-2)*font_width;
+    else if(label.substring(0,1) == "n")
+        return (label.length-1)*font_width;
+    else
+        return (label.length)*font_width;
+}
+
+
+/*!
+ *  Return Pin label with all need parsing
+ */
+function parse_pin_label(label) {
+    if(label.substring(0,2).toUpperCase() == "N_")
+        return "~{" + label.substring(2) + "}";
+    else if(label.substring(0,1) == "n")
+        return "~{" + label.substring(1) + "}";
+    else
+        return label;
+}
+
+
+/*!
+ *  Aligment size to grid
+ */
+function grid_aligm(val) {
+    return Math.round(val/grid)*grid
+}
+
+
 /*!
  *  Call when page is load, can be use to generate description, additional init and etc.
  */
@@ -24,10 +63,12 @@ function onload_handler() {
 		
 	document.getElementById("description").innerHTML = `Place in textarea list of pin in format: "pin_number pin_name [pin_type] [additional info]".<br> 
 								To delimeter pins by group as separate unit subsymbol use format: "&lt;|&gt;Functional name" in pin list (&lt; - left side placment, &gt; - right side placment) .<br>
-								To delimeter pins by group inside one symbol use "---".
+								To delimeter pins by group inside one symbol use "---". <br>
+								To add invert symbol, type nPinName or N_PinName <br>
 								After generation take text from popup and past it into necesary *.kicad_sym file, or use Save file button to save symbol in separate *.kicad_sym file.<br>`
 									
 } 
+
 
 /*!
  *  Update file name showen in popup window
@@ -37,6 +78,7 @@ function  upd_poup_header() {
 	mod_name = mod_name.replace(/\s/g, "_");
 	document.getElementById("file_name").innerHTML = `${mod_name}.kicad_sym`;
 };
+
 
 /*! 
  * Parse text to pin list
@@ -92,6 +134,7 @@ function get_parsed_pins(raw_list) {
 	return sort_list;
 };
 
+
 /*!
  *	Check pin to duplicate
  */
@@ -112,18 +155,18 @@ function is_id_duplicate(pins_list) {
 	return result;
 }
 
+
 /*!
 *  Generate symbol property
 */
 function symbol_property_gen() {
-	sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -19.05, pos_y: 7.62, font: 2},
-	{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: -2.54, pos_y: 7.62, font: 2},
+	sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -7.62, pos_y: 2.54, font: 2},
+	{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: 7.62, pos_y: 2.54, font: 2},
 	{prop: "Footprint", value: "", pos_x: 20.32, pos_y: 7.62, font: 2},
 	{prop: "Datasheet", value: document.getElementById("symbol_ds").value, pos_x: -2.54, pos_y: 21.59, font: 1.27},
 	{prop: "ki_locked", value: "", pos_x: 0, pos_y: 0, font: 1.27},
 	{prop: "ki_keywords", value: "", pos_x: 0, pos_y: 0, font: 1.27},
-	{prop: "ki_description", value: document.getElementById("symbol_desc").value, pos_x: 0, pos_y: 0, font: 1.27},
-	]
+	{prop: "ki_description", value: document.getElementById("symbol_desc").value, pos_x: 0, pos_y: 0, font: 1.27},]
 	
 	return_text = "";
 	sym_prop.forEach(function (item, index) {
@@ -135,42 +178,109 @@ function symbol_property_gen() {
 	return return_text;
 }
 
+
 /*!
  * Based on pins list, calc size of body, placment for vertical lines, and etc.
  */
 function calc_body_size(symbol_type, pins_lists) {
-    ret_dic = {"body_length": 0, "body_width": 0, "left_line": 0, "right_line": 0};
+    ret_dic = {"body_length": 0, "left_width": 0, "right_width": 0};
     
-    left_length = 0;
-    rigth_length = 0;
-    middle_length = 1.8 * symbol_type.length;
-    
+    // Right side pins
+    body_length = 0;
     pins_lists["rside_pins"].forEach(function(item) {
-        if(item["label"].length*1.6 > rigth_length) rigth_length = item["label"].length*1.6;
+        if(pin_label_length(item["label"]) > ret_dic["right_width"]) ret_dic["right_width"] = grid_aligm(pin_label_length(item["label"]));
+        if(item["index"] == "---") body_length += grid;
+        else body_length += grid*2.0;
     });
     
+    ret_dic["body_length"] = body_length;
+    
+    // Left side pins
+    body_length = 0;
     pins_lists["lside_pins"].forEach(function(item) {
-        if(item["label"].length*1.6 > left_length) left_length = item["label"].length*1.6;   
+        if(pin_label_length(item["label"]) > ret_dic["left_width"]) ret_dic["left_width"] = grid_aligm(pin_label_length(item["label"]));
+        if(item["index"] == "---") body_length += grid;
+        else body_length += grid*2.0; 
     });
     
-    
-    
+    if(body_length > ret_dic["body_length"])
+        ret_dic["body_length"] = body_length;
+        
     return ret_dic;
 };
+
 
 /*!
  * Generate text description for body (text and lines)
  */
 function generate_body(fname, symbl_type, body_size) {
-   return "";
+    text = "";
+    line_x_pos = grid_aligm(font_size * 3);
+    
+    // Left line
+    text += `(polyline (pts (xy -${line_x_pos} 0) (xy -${line_x_pos} -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
+    
+    // Right line
+    text += `(polyline (pts (xy ${line_x_pos} 0) (xy ${line_x_pos} -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
+    
+    // Body
+    rec_start = line_x_pos + body_size["left_width"]
+    rec_end = line_x_pos + body_size["right_width"]
+    text += `(rectangle (start -${rec_start} 0) (end ${rec_end} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type background)))\r\n`;
+    
+    // Symbl type
+    text += `(text ${symbl_type} (at 0 -${grid} 0)(effects (font (size 2 2))))\r\n`
+    text += `(text ${fname} (at 0 -${body_size["body_length"]+2} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
+    
+    return text;
 };
+
 
 /*!
  * Generate text description for pins
  */
-function pins_placer(pins_lists) {
-   return ""; 
+function pins_placer(pins_lists, body_size) {
+    text = ""
+    y_pos = 0;
+    
+    // Right side pins
+    line_x_start = grid_aligm(font_size * 3) + body_size["right_width"];
+    line_x_end = grid_aligm(font_size * 3);
+    pins_lists["rside_pins"].forEach(function(item) {
+        if(item["index"] == "---") {
+            y_pos += grid/2.0;
+            text += `(polyline (pts (xy ${line_x_start} -${y_pos}) (xy ${line_x_end} -${y_pos})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
+            y_pos += grid/2.0;
+        } else {
+            y_pos += grid;
+            text += `(pin passive line (at ${line_x_start+pin_length} -${y_pos} 180) (length ${pin_length}) 
+                    (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
+                    (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
+            y_pos += grid;        
+        }
+    });
+    
+    // Left side pins
+    y_pos = 0;
+    line_x_start = (grid_aligm(font_size * 3) + body_size["left_width"]);
+    line_x_end = grid_aligm(font_size * 3); 
+    pins_lists["lside_pins"].forEach(function(item) {
+        if(item["index"] == "---") {
+            y_pos += grid/2.0;
+            text += `(polyline (pts (xy -${line_x_start} -${y_pos}) (xy -${line_x_end} -${y_pos})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
+            y_pos += grid/2.0;
+        } else {
+            y_pos += grid;
+            text += `(pin passive line (at -${line_x_start + pin_length} -${y_pos} 0) (length ${pin_length}) 
+                    (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
+                    (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
+            y_pos += grid;        
+        }
+    });
+    
+    return text; 
 };
+
 
 /*!
  *  Main process for build kicad symbol structure
@@ -190,14 +300,14 @@ function process(){
 		return;
 	}
 	// Symbol header
-	symbol_text	= `(symbol "${symbl_name}" (pin_numbers hide) (pin_names hide) (in_bom yes) (on_board yes)\r\n`
+	symbol_text	= `(symbol "${symbl_name}" (in_bom yes) (on_board yes)\r\n`
 	
 	symbol_text	+= symbol_property_gen();
 	
 	// Unit generation
- 	//pins_groups.forEach(function(pins, index) {
-    for (const [key, value] of Object.entries(pins_groups)) {
-        // Skip if both list is empty
+ 	for (const [key, value] of Object.entries(pins_groups)) {
+        
+        // Skip if both pins list is empty
         if( (pins_groups[key]["rside_pins"].length == 0) && (pins_groups[key]["lside_pins"].length == 0))
             continue;
                 
@@ -211,61 +321,15 @@ function process(){
         
         // Place pins
         symbol_text += `(symbol "${symbl_name}_${sub_index}_1"\r\n`
-        symbol_text += pins_placer(pins_groups[key]);
+        symbol_text += pins_placer(pins_groups[key], body_sizes);
         symbol_text += `)\r\n`
         
         sub_index += 1;
         
     }
-// 		show_pin_count = 0
-// 		first_grp_pin = {}
-// 		Text and pins generation
-// 		symbol_pins =`(symbol "${symbl_name}_${index+1}_1"\r\n`
-// 		
-// 		/* Pin and name field */
-// 		pos_y = y_init
-// 		pins["pin_list"].forEach(function(item) {
-// 			pin_name = item["label"].toUpperCase()
-// 			if(is_gnd_concate & /\S*GND\S*/.test(pin_name)) {
-// 				if(first_grp_pin[pin_name] === undefined) {
-// 					first_grp_pin[pin_name] = pos_y;
-// 				}else {
-// 					temp_y = first_grp_pin[pin_name].toFixed(3)
-// 					symbol_pins += `(pin  ${item["type"]} line (at 15.24 ${temp_y} 180) (length ${pin_length}) hide`
-// 					symbol_pins += `(name "${item["label"]}" (effects (font (size 2 2)))) `
-// 					symbol_pins += `(number "${item["index"]}" (effects (font (size 2 2)))))\r\n`
-// 					return;		
-// 				}
-// 			}
-// 			symbol_pins += `(text "${item["index"]}" (at 4.826 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
-// 			symbol_pins += `(text "${item["label"]}" (at -10.16 ${pos_y.toFixed(3)} 0)(effects (font (size 2 2))))\r\n`
-// 			symbol_pins += `(pin ${item["type"]} line (at 15.24 ${pos_y.toFixed(3)} 180) (length ${pin_length}) `
-// 			symbol_pins += `(name "${item["label"]}" (effects (font (size 2 2)))) `
-// 			symbol_pins += `(number "${item["index"]}" (effects (font (size 2 2)))))\r\n`		
-// 			pos_y += y_step;
-// 			show_pin_count++;				
-// 		});
-// 		
-// 		symbol_pins += "(text \"Цепь\" (at -10.16 2.54 0)(effects (font (size 2 2))))\r\n"
-// 		if(pins["fname"] != "") {
-// 			symbol_pins += `(text "${pins["fname"]}" (at -5.08 ${show_pin_count*y_step+y_init} 0)(effects (font (size 2 2))))\r\n`
-// 		}
-// 		
-// 		/* Lines generation */
-// 		symbol_lines = `(symbol "${symbl_name}_${index+1}_0"\r\n`
-// 		symbol_lines += `(rectangle (start -20.32 5.08) (end 10.16 ${y_step*show_pin_count}) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
-// 		
-// 		for (i=0; ; i+=y_step) { 
-// 			symbol_lines += `(polyline (pts(xy -20.32 ${i}) (xy 10.16 ${i.toFixed(3)})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none)))\r\n`
-// 			if(i <= y_step*(show_pin_count-1))
-// 				break;
-// 		}
-// 		symbol_lines +=`(polyline (pts(xy 0 5.08) (xy 0 ${y_step*show_pin_count})) (stroke (width 0) (type default) (color 0 0 0 0))(fill (type none))))\r\n`
-// 		
-// 		symbol_text += symbol_lines + symbol_pins + ")\r\n";
- 	//});
 	document.getElementById("output").value = symbol_text + ")";
 };
+
 
 /*!
  *  Save .kicad_sim file
