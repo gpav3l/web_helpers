@@ -9,5 +9,5 @@ Start from index.html and choose tools.
  * Group pin by name or info
  * Connector symbol 
  * Module symbol generator (very similar to connector)
- * IC generator (under construction)
+ * IC generator
 
