@@ -1,10 +1,10 @@
-const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]*(\\S+)?\[\\t\\s\]*(PI|PO|IO|I|O|P)?.*?$');
+const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(PI|PO|IO|I|O)?.*?$');
 const func_name_regex = new RegExp('^\[\\t\\s\]*(>|<)\[\\t\\s\]*(\\S+)$');
+const pin_group_regex = new RegExp('^---\[\\t\\s\]*$');
 
 const grid = 2.54;
 const font_size = 2;
 const pin_length = 5.08;
-const num_part_length = grid_aligm(font_size*4)
 const pin_types ={"PO": "power_out", "PI":"power_in", "IO": "bidirectional", "I": "input", "O": "output"};
 
 /*!
@@ -12,6 +12,9 @@ const pin_types ={"PO": "power_out", "PI":"power_in", "IO": "bidirectional", "I"
  */
 function pin_label_length(label) {
     const font_width = font_size + 0.5
+    
+    if(label.length < 2) 
+        return font_width*3;
     
     if(label.substring(0,2).toUpperCase() == "N_")
         return (label.length-2)*font_width;
@@ -47,22 +50,23 @@ function grid_aligm(val) {
  *  Call when page is load, can be use to generate description, additional init and etc.
  */
 function onload_handler() {
-	out_text = "empty or \"P\"- passive<br>"
+	out_text = "empty - passive<br>"
 	for (var key in pin_types) {
 		if (pin_types.hasOwnProperty(key)) {           
 			out_text += `"${key}" - ${pin_types[key]}<br>`;
 		}
 	}
-	pin_types["P"] = "passive";
 		
 	document.getElementById("pin_types_info").innerHTML = out_text
 	
-	document.getElementById("page_header").innerHTML = "<h3>Connector generation</h3>"
+	document.getElementById("page_header").innerHTML = "<h3>IC generation</h3>"
 		
 	document.getElementById("description").innerHTML = `Place in textarea list of pin in format: "pin_number pin_name [pin_type] [additional info]".<br> 
-                                To add invert symbol, type nPinName or N_PinName <br>
 								To delimeter pins by group as separate unit subsymbol use format: "&lt;|&gt;Functional name" in pin list (&lt; - left side placment, &gt; - right side placment) .<br>
-								After generation take text from popup and past it into necesary *.kicad_sym file, or use Save file button to save symbol in separate *.kicad_sym file.<br>`									
+								To delimeter pins by group inside one symbol use "---". <br>
+								To add invert symbol, type nPinName or N_PinName <br>
+								After generation take text from popup and past it into necesary *.kicad_sym file, or use Save file button to save symbol in separate *.kicad_sym file.<br>`
+									
 } 
 
 
@@ -82,7 +86,7 @@ function  upd_poup_header() {
 function get_parsed_pins(raw_list) {		
 	sort_list = { "": { lside_pins: [], rside_pins: [] } }
 	sub_list = []
-	func_name = ">"; // By default add pins at right side
+	func_name = "<"; // By default add pins at left side
     
 	lines = raw_list.split("\n")
 	
@@ -111,17 +115,12 @@ function get_parsed_pins(raw_list) {
 		} else {
 			if (item.match(pin_regex) != null) {
 				pin_type = "passive"
-                label = ""
 				temp = pin_regex.exec(item)
-				if(temp[2] !== undefined) {
-                    if((temp[2] in pin_types) & !(temp[3] in pin_types))
-                        pin_type = pin_types[temp[2]]
-                    else
-                        label = temp[2]
-                }
-                if(temp[3] !== undefined) pin_type = pin_types[temp[3]]
-				sub_list.push({"index":temp[1], "label":label, "type":pin_type})
-			} 
+				if(temp[3] !== undefined) pin_type = pin_types[temp[3]]
+				sub_list.push({"index":temp[1], "label":temp[2], "type":pin_type})
+			} else if (item.match(pin_group_regex) != null) {
+                sub_list.push({"index": "---", "label": "", "type": ""})
+            }
 		}
 	});
 	
@@ -161,10 +160,8 @@ function is_id_duplicate(pins_list) {
 *  Generate symbol property
 */
 function symbol_property_gen() {
-    symbl_name = document.getElementById("symbol_name").value
-    
-	sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -5.08, pos_y: 7.62, font: 2},
-	{prop: "Value", value: symbl_name, pos_x: symbl_name.length, pos_y: 7.62, font: 2},
+	sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -7.62, pos_y: 2.54, font: 2},
+	{prop: "Value", value: document.getElementById("symbol_name").value, pos_x: 7.62, pos_y: 2.54, font: 2},
 	{prop: "Footprint", value: "", pos_x: 20.32, pos_y: 7.62, font: 2},
 	{prop: "Datasheet", value: document.getElementById("symbol_ds").value, pos_x: -2.54, pos_y: 21.59, font: 1.27},
 	{prop: "ki_locked", value: "", pos_x: 0, pos_y: 0, font: 1.27},
@@ -185,29 +182,28 @@ function symbol_property_gen() {
 /*!
  * Based on pins list, calc size of body, placment for vertical lines, and etc.
  */
-function calc_body_size(pins_lists) {
+function calc_body_size(symbol_type, pins_lists) {
     ret_dic = {"body_length": 0, "left_width": 0, "right_width": 0};
-    min_width = grid_aligm(font_size * 10)
     
     // Right side pins
     body_length = 0;
     pins_lists["rside_pins"].forEach(function(item) {
         if(pin_label_length(item["label"]) > ret_dic["right_width"]) ret_dic["right_width"] = grid_aligm(pin_label_length(item["label"]));
-        body_length += grid_aligm(font_size)*2.0;
+        if(item["index"] == "---") body_length += grid_aligm(font_size);
+        else body_length += grid_aligm(font_size)*2.0;
     });
-    if((ret_dic["right_width"] != 0) && (ret_dic["right_width"] < min_width))
-        ret_dic["right_width"] = min_width
-        
+    //ret_dic["right_width"] += grid
+    
     ret_dic["body_length"] = body_length;
     
     // Left side pins
     body_length = 0;
     pins_lists["lside_pins"].forEach(function(item) {
         if(pin_label_length(item["label"]) > ret_dic["left_width"]) ret_dic["left_width"] = grid_aligm(pin_label_length(item["label"]));
-        body_length += grid_aligm(font_size)*2.0; 
+        if(item["index"] == "---") body_length += grid_aligm(font_size);
+        else body_length += grid_aligm(font_size)*2.0; 
     });
-    if((ret_dic["left_width"] != 0) && (ret_dic["left_width"] < min_width))
-        ret_dic["left_width"] = min_width
+    //ret_dic["left_width"] += grid
     
     if(body_length > ret_dic["body_length"])
         ret_dic["body_length"] = body_length;
@@ -219,40 +215,23 @@ function calc_body_size(pins_lists) {
 /*!
  * Generate text description for body (text and lines)
  */
-function generate_body(fname, body_size) {
+function generate_body(fname, symbl_type, body_size) {
     text = "";
-    rec_start = 0
-    rec_end = 0
-    y_body_top = grid_aligm(font_size*2.0)
+    line_x_pos = grid_aligm(font_size * 3);
     
-    if((body_size["left_width"] != 0) && (body_size["right_width"] != 0)) {
-        text += `(text "Цепь" (at -${body_size["left_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        text += `(text "Цепь" (at ${body_size["right_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        
-        rec_start = -(body_size["left_width"] + num_part_length)
-        rec_end = body_size["right_width"]  + num_part_length
-        text += `(polyline (pts (xy -${body_size["left_width"]} ${y_body_top}) (xy -${body_size["left_width"]} -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
-        text += `(polyline (pts (xy ${body_size["right_width"]} ${y_body_top}) (xy ${body_size["right_width"]} -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
+    // Left line
+    text += `(polyline (pts (xy -${line_x_pos} 0) (xy -${line_x_pos} -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
     
-    } else {
-        if(body_size["left_width"] != 0) {
-            text += `(text "Цепь" (at ${body_size["left_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-            rec_start = -num_part_length
-            rec_end = body_size["left_width"]
-            
-        } else {
-            text += `(text "Цепь" (at -${body_size["right_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-            rec_start = -body_size["right_width"]
-            rec_end = num_part_length
-        }
-    }
-    text += `(polyline (pts (xy 0 ${y_body_top}) (xy 0 -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
-
-    text += `(rectangle (start ${rec_start} ${y_body_top}) (end ${rec_end} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type background)))\r\n`;
+    // Right line
+    text += `(polyline (pts (xy ${line_x_pos} 0) (xy ${line_x_pos} -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
     
-    for(i=0; i<body_size["body_length"]; i+= grid_aligm(font_size*2)) {
-        text += `(polyline (pts (xy ${rec_start} -${i}) (xy ${rec_end} -${i})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
-    }
+    // Body
+    rec_start = line_x_pos + body_size["left_width"]
+    rec_end = line_x_pos + body_size["right_width"]
+    text += `(rectangle (start -${rec_start} 0) (end ${rec_end} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type background)))\r\n`;
+    
+    // Symbl type
+    text += `(text ${symbl_type} (at 0 -${grid_aligm(font_size)} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
     text += `(text ${fname} (at 0 -${body_size["body_length"]+font_size} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
     
     return text;
@@ -264,37 +243,41 @@ function generate_body(fname, body_size) {
  */
 function pins_placer(pins_lists, body_size) {
     text = ""
+    y_pos = 0;
     
     // Right side pins
-    y_pos = 0;
-    x_pos = body_size["right_width"] + num_part_length + pin_length;
-    if(body_size["left_width"] == 0)
-        x_pos = num_part_length + pin_length        
+    line_x_start = grid_aligm(font_size * 3) + body_size["right_width"];
+    line_x_end = grid_aligm(font_size * 3);
     pins_lists["rside_pins"].forEach(function(item) {
-        y_pos += grid_aligm(font_size);
-        text += `(pin ${item["type"]} line (at ${x_pos} -${y_pos} 180) (length ${pin_length}) 
-                (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
-                (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
-        text += `(text "${item["index"]}" (at ${x_pos-pin_length-num_part_length/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        if(item["label"].lengt != 0)
-            text += `(text "${parse_pin_label(item["label"])}" (at ${x_pos-pin_length-num_part_length - body_size["right_width"]/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        y_pos += grid_aligm(font_size);        
+        if(item["index"] == "---") {
+            y_pos += grid_aligm(font_size)/2.0;
+            text += `(polyline (pts (xy ${line_x_start} -${y_pos}) (xy ${line_x_end} -${y_pos})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
+            y_pos += grid_aligm(font_size)/2.0;
+        } else {
+            y_pos += grid_aligm(font_size);
+            text += `(pin ${item["type"]} line (at ${line_x_start+pin_length} -${y_pos} 180) (length ${pin_length}) 
+                    (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
+                    (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
+            y_pos += grid_aligm(font_size);        
+        }
     });
     
     // Left side pins
     y_pos = 0;
-    x_pos = (body_size["left_width"] + num_part_length + pin_length);
-    if(body_size["right_width"] == 0)
-        x_pos = (num_part_length + pin_length); 
+    line_x_start = (grid_aligm(font_size * 3) + body_size["left_width"]);
+    line_x_end = grid_aligm(font_size * 3); 
     pins_lists["lside_pins"].forEach(function(item) {
-        y_pos += grid_aligm(font_size);
-        text += `(pin ${item["type"]} line (at -${x_pos} -${y_pos} 0) (length ${pin_length}) 
-                (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
-                (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
-        text += `(text "${item["index"]}" (at -${x_pos-pin_length-num_part_length/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        if(item["label"].lengt != 0)
-            text += `(text "${parse_pin_label(item["label"])}" (at -${x_pos-pin_length-num_part_length - body_size["left_width"]/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        y_pos += grid_aligm(font_size);        
+        if(item["index"] == "---") {
+            y_pos += grid_aligm(font_size)/2.0;
+            text += `(polyline (pts (xy -${line_x_start} -${y_pos}) (xy -${line_x_end} -${y_pos})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
+            y_pos += grid_aligm(font_size)/2.0;
+        } else {
+            y_pos += grid_aligm(font_size);
+            text += `(pin ${item["type"]} line (at -${line_x_start + pin_length} -${y_pos} 0) (length ${pin_length}) 
+                    (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
+                    (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
+            y_pos += grid_aligm(font_size);        
+        }
     });
     
     return text; 
@@ -310,7 +293,8 @@ function process(){
 
 	pins_groups = get_parsed_pins(document.getElementById("pin_list").value);
 	symbl_name = document.getElementById("symbol_name").value.replace(/\s/g, "_");
-    //is_gnd_concate = document.getElementById("is_gnd_concate").checked;
+    symbl_type = document.getElementById("symbol_type").value.toUpperCase();
+	//is_gnd_concate = document.getElementById("is_gnd_concate").checked;
 	
 	if((dupl_id = is_id_duplicate(pins_groups)) != "") {
 		document.getElementById("output").value = "";
@@ -318,7 +302,7 @@ function process(){
 		return;
 	}
 	// Symbol header
-	symbol_text	= `(symbol "${symbl_name}" (pin_numbers hide) (pin_names hide) (in_bom yes) (on_board yes)\r\n`
+	symbol_text	= `(symbol "${symbl_name}" (in_bom yes) (on_board yes)\r\n`
 	
 	symbol_text	+= symbol_property_gen();
 	
@@ -330,11 +314,11 @@ function process(){
             continue;
                 
         // Calculate size of rectangel
-        body_sizes = calc_body_size(pins_groups[key]);
+        body_sizes = calc_body_size(symbl_type, pins_groups[key]);
         
         // Plot rectangle with texts
         symbol_text += `(symbol "${symbl_name}_${sub_index}_0"\r\n`
-        symbol_text += generate_body(key, body_sizes);
+        symbol_text += generate_body(key, symbl_type, body_sizes);
         symbol_text += `)\r\n`
         
         // Place pins

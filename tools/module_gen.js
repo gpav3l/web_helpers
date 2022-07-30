@@ -1,4 +1,4 @@
-const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]*(\\S+)?\[\\t\\s\]*(PI|PO|IO|I|O|P)?.*?$');
+const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(PI|PO|IO|I|O)?.*?$');
 const func_name_regex = new RegExp('^\[\\t\\s\]*(>|<)\[\\t\\s\]*(\\S+)$');
 
 const grid = 2.54;
@@ -47,17 +47,16 @@ function grid_aligm(val) {
  *  Call when page is load, can be use to generate description, additional init and etc.
  */
 function onload_handler() {
-	out_text = "empty or \"P\"- passive<br>"
+	out_text = "empty - passive<br>"
 	for (var key in pin_types) {
 		if (pin_types.hasOwnProperty(key)) {           
 			out_text += `"${key}" - ${pin_types[key]}<br>`;
 		}
 	}
-	pin_types["P"] = "passive";
 		
 	document.getElementById("pin_types_info").innerHTML = out_text
 	
-	document.getElementById("page_header").innerHTML = "<h3>Connector generation</h3>"
+	document.getElementById("page_header").innerHTML = "<h3>Module generation</h3>"
 		
 	document.getElementById("description").innerHTML = `Place in textarea list of pin in format: "pin_number pin_name [pin_type] [additional info]".<br> 
                                 To add invert symbol, type nPinName or N_PinName <br>
@@ -111,16 +110,9 @@ function get_parsed_pins(raw_list) {
 		} else {
 			if (item.match(pin_regex) != null) {
 				pin_type = "passive"
-                label = ""
 				temp = pin_regex.exec(item)
-				if(temp[2] !== undefined) {
-                    if((temp[2] in pin_types) & !(temp[3] in pin_types))
-                        pin_type = pin_types[temp[2]]
-                    else
-                        label = temp[2]
-                }
-                if(temp[3] !== undefined) pin_type = pin_types[temp[3]]
-				sub_list.push({"index":temp[1], "label":label, "type":pin_type})
+				if(temp[3] !== undefined) pin_type = pin_types[temp[3]]
+				sub_list.push({"index":temp[1], "label":temp[2], "type":pin_type})
 			} 
 		}
 	});
@@ -163,7 +155,7 @@ function is_id_duplicate(pins_list) {
 function symbol_property_gen() {
     symbl_name = document.getElementById("symbol_name").value
     
-	sym_prop = [{prop: "Reference", value: document.getElementById("symbol_ref").value, pos_x: -5.08, pos_y: 7.62, font: 2},
+	sym_prop = [{prop: "Reference", value: "A", pos_x: -5.08, pos_y: 7.62, font: 2},
 	{prop: "Value", value: symbl_name, pos_x: symbl_name.length, pos_y: 7.62, font: 2},
 	{prop: "Footprint", value: "", pos_x: 20.32, pos_y: 7.62, font: 2},
 	{prop: "Datasheet", value: document.getElementById("symbol_ds").value, pos_x: -2.54, pos_y: 21.59, font: 1.27},
@@ -276,8 +268,7 @@ function pins_placer(pins_lists, body_size) {
                 (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                 (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
         text += `(text "${item["index"]}" (at ${x_pos-pin_length-num_part_length/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        if(item["label"].lengt != 0)
-            text += `(text "${parse_pin_label(item["label"])}" (at ${x_pos-pin_length-num_part_length - body_size["right_width"]/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
+        text += `(text "${parse_pin_label(item["label"])}" (at ${x_pos-pin_length-num_part_length - body_size["right_width"]/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
         y_pos += grid_aligm(font_size);        
     });
     
@@ -292,8 +283,7 @@ function pins_placer(pins_lists, body_size) {
                 (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                 (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
         text += `(text "${item["index"]}" (at -${x_pos-pin_length-num_part_length/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        if(item["label"].lengt != 0)
-            text += `(text "${parse_pin_label(item["label"])}" (at -${x_pos-pin_length-num_part_length - body_size["left_width"]/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
+        text += `(text "${parse_pin_label(item["label"])}" (at -${x_pos-pin_length-num_part_length - body_size["left_width"]/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
         y_pos += grid_aligm(font_size);        
     });
     

@@ -5,18 +5,18 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     
-    <link href="css/bootstrap.min.css" rel="stylesheet">
-    <link href="css/sidebars.css" rel="stylesheet">
-    <link href="css/custom.css" rel="stylesheet">
-    <link href="css/icons.css" rel="stylesheet">
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/sidebars.css" rel="stylesheet">
+    <link href="../css/custom.css" rel="stylesheet">
+    <link href="../css/icons.css" rel="stylesheet">
     
     <title>KiCAD helper</title>
     
-    <script src="js/page_gen_parts.js"></script>
-	<script src="js/open_file.js"></script>
+    <script src="../js/page_gen_parts.js"></script>
+	<script src="../js/open_file.js"></script>
 	
 	<!-- Description and process js for selected tools --> 
-	<script src="tools/pin_grouping.js"></script>
+	<script src="../tools/module_gen.js"></script>
     <script> window.onload = function() {
         // Generate sidebar navigation
         gen_page_content();
@@ -51,36 +51,48 @@
                 </div>
                 <div class="card-body">
                     <table>
-                        <tr><th>Name</th><td><input id="symbol_name" type="text" value="IC pin sort"></td></tr>
+                        <tr><th>Name</th><td><input id="symbol_name" type="text" value="Module"></td></tr>
+                        <tr><td>&nbsp;</td></tr>
+                        <table>
+                            <tr><th>Description</th><td><input style="width:100%;" id="symbol_desc" type="text" value="" size="90"></td></tr>	
+                            <tr><th>Datasheet</th><td><input style="width:100%;" id="symbol_ds" type="text" size="90"></td></tr>
+                        </table>
                     </table>
                 </div>
                 <div class="list-group">
-                    <list>
-                    <ul><input id="sort_by_info" type="radio" name="sort_type" checked="checked">Sort by pin description</ul>
-                    <ul><input id="sort_by_name" type="radio" name="sort_type">Sort by pin name</ul>
-                    </list>
+                    <!--<list>
+                    <ul><input id="is_gnd_concate" type="checkbox"> Show only one GND pins (hide other)</ul>
+                    </list>-->
                 </div>
                 <div class="card-body">
                   <textarea class="data_input" id="pin_list" rows="40" cols="80">
-1 GND Ground pin
-2 VCC Power pin
-3 GPIO Digital Input/Output 1
-5 GND Ground pin
-4 GPIO Digital Input/Output 2
+>Test
+1 GND PI Ground pin
+2 VCC PI Power pin
+3 GPIO IO Digital Input/Output 1
+5 GND PI Ground pin
+
+>Functional
+4 GPI I Digital Input/Output 2
+10 AGND Analog power rail
 6 VCC Power pin
 7 AVCC Analog power rail
 8 AGND Analog power rail
+
+<Functional
+11 GPI I Digital Input/Output 4
+12 AGND PI Analog power rail
                   </textarea>
                 </div>
               </div>
             </div>
             
              <!-- Right sidebar -->
-            <!--<div class="col-sm-4">
+            <div class="col-sm-4">
               <div class="card">
                 <div class="card-header"> Tips </div>
                 <div class="card-body">
-                  <img style="max-width:100%;max-height:100%;" src="../images/conn_gen_tips.png" alt="Tips image">
+                  <img style="max-width:100%;max-height:100%;" src="../images/mod_gen_tips.png" alt="Tips image">
                 </div>
                 
                 <div class="card-header">
@@ -91,7 +103,7 @@
                 </div>
               </div>
             </div>
-            -->
+            
             
           </div>
         </div>
@@ -115,8 +127,8 @@
       </div>
     </div>
   </div>
-  <script src="js/jquery-1.11.3.min.js"></script>
-  <script src="js/bootstrap.bundle.min.js"></script>
+  <script src="../js/jquery-1.11.3.min.js"></script>
+  <script src="../js/bootstrap.bundle.min.js"></script>
 
 </body>
 

@@ -1,45 +1,11 @@
 /*!
- * Print out file content into input textarea
+ *  Call when page is load, can be use to generate description, additional init and etc.
  */
-function dispFile(contents) {
-  document.getElementById('pin_list').innerHTML=contents
-}
-
-/*!
- * Catch file select
- */
-function clickElem(elem) {
-	var eventMouse = document.createEvent("MouseEvents")
-	eventMouse.initMouseEvent("click", true, false, window, 0, 0, 0, 0, 0, false, false, false, false, 0, null)
-	elem.dispatchEvent(eventMouse)
-}
-
-/*!
- * Show open file dialog
- */
-function openFile(func) {
-	readFile = function(e) {
-		var file = e.target.files[0];
-		if (!file) {
-			return;
-		}
-		var reader = new FileReader();
-		reader.onload = function(e) {
-			var contents = e.target.result;
-			fileInput.func(contents)
-			document.body.removeChild(fileInput)
-		}
-		reader.readAsText(file)
-	}
-	fileInput = document.createElement("input")
-	fileInput.type='file'
-	fileInput.accept='.txt'
-	fileInput.style.display='none'
-	fileInput.onchange=readFile
-	fileInput.func=func
-	document.body.appendChild(fileInput)
-	clickElem(fileInput)
-}
+function onload_handler() {
+	document.getElementById("page_header").innerHTML = "<h3>Pin sorting</h3>"
+	document.getElementById("description").innerHTML = `Place in textarea list of pin in format: <b>pin_number pin_name pin_description</b><br>
+		Copy from right textarea sorted by group pins, or save into *.txt file.`		
+} 
 
 /*!
  * Parse raw input to pin number, pin name and pin description
@@ -98,6 +64,8 @@ function sort_by_name(list){
  *  Main process for build kicad symbol structure
  */
 function process(){
+	upd_poup_header();
+	
 	list = parse_input(document.getElementById("pin_list").value)
 	res_ouput = ""
 	
@@ -110,7 +78,17 @@ function process(){
 };
 
 /*!
- *  Save sorted pin to file
+ *  Update file name showen in popup window
+ */
+function  upd_poup_header() {
+	mod_name = document.getElementById("symbol_name").value;
+	mod_name = mod_name.replace(/\s/g, "_");
+	document.getElementById("file_name").innerHTML = `${mod_name}.txt`;
+};
+
+
+/*!
+ *  Save .kicad_sim file
  */
 function save_file() {
 	if(document.getElementById("output").value == "") {
@@ -118,7 +96,8 @@ function save_file() {
 	} else {
 		var a = document.createElement("a");
 		a.href = window.URL.createObjectURL(new Blob([document.getElementById("output").value], {type: "text/plain"}));
-		a.download = `pin_sorted.txt`;
+		a.download = `${document.getElementById("file_name").innerHTML}`;
 		a.click();
+		alert("File is saved as ".concat(a.download))
 	}
 };
