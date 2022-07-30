@@ -1,5 +1,5 @@
 const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]+(\\S+)\[\\t\\s\]*(PI|PO|IO|I|O)?.*?$');
-const func_name_regex = new RegExp('^\[\\t\\s\]*(>|<)\[\\t\\s\]*(\\S+)$');
+const func_name_regex = new RegExp('^\[\\t\\s\]*(>|<)\[\\t\\s\]*(.*)$');
 const pin_group_regex = new RegExp('^---\[\\t\\s\]*$');
 
 const grid = 2.54;
@@ -91,7 +91,7 @@ function get_parsed_pins(raw_list) {
 	lines = raw_list.split("\n")
 	
 	lines.forEach(function (item, index) {        
-		if(item.match(new RegExp('^\[\\t\\s\]*$')) | (item.match(func_name_regex) != null)) {
+		if(item.match(func_name_regex) != null) {
 			if(sub_list.length != 0) { 
                 if(func_name.substring(0,1) == "<")
                     sort_list[func_name.substring(1)]["lside_pins"] = sub_list;
@@ -232,7 +232,7 @@ function generate_body(fname, symbl_type, body_size) {
     
     // Symbl type
     text += `(text ${symbl_type} (at 0 -${grid_aligm(font_size)} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-    text += `(text ${fname} (at 0 -${body_size["body_length"]+font_size} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
+    text += `(text "${fname}" (at 0 -${body_size["body_length"]+font_size} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
     
     return text;
 };

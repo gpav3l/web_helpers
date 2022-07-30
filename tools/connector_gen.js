@@ -1,5 +1,5 @@
 const pin_regex = new RegExp('^\[\\t\\s\]*(\\S+)\[\\t\\s\]*(\\S+)?\[\\t\\s\]*(PI|PO|IO|I|O|P)?.*?$');
-const func_name_regex = new RegExp('^\[\\t\\s\]*(>|<)\[\\t\\s\]*(\\S+)$');
+const func_name_regex = new RegExp('^\[\\t\\s\]*(>|<)\[\\t\\s\]*(.*)$');
 
 const grid = 2.54;
 const font_size = 2;
@@ -87,7 +87,7 @@ function get_parsed_pins(raw_list) {
 	lines = raw_list.split("\n")
 	
 	lines.forEach(function (item, index) {        
-		if(item.match(new RegExp('^\[\\t\\s\]*$')) | (item.match(func_name_regex) != null)) {
+		if(item.match(func_name_regex) != null) {
 			if(sub_list.length != 0) { 
                 if(func_name.substring(0,1) == "<")
                     sort_list[func_name.substring(1)]["lside_pins"] = sub_list;
@@ -99,7 +99,7 @@ function get_parsed_pins(raw_list) {
 			if(item.match(func_name_regex) != null) { 
 				func_name = func_name_regex.exec(item)[1] + func_name_regex.exec(item)[2];
 			} else {
-				func_name = "<";
+				func_name = ">";
 			}
 			
 			if( !(func_name.substring(1) in sort_list) ) {
@@ -253,7 +253,7 @@ function generate_body(fname, body_size) {
     for(i=0; i<body_size["body_length"]; i+= grid_aligm(font_size*2)) {
         text += `(polyline (pts (xy ${rec_start} -${i}) (xy ${rec_end} -${i})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
     }
-    text += `(text ${fname} (at 0 -${body_size["body_length"]+font_size} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
+    text += `(text "${fname}" (at 0 -${body_size["body_length"]+font_size} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
     
     return text;
 };
