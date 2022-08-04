@@ -219,7 +219,7 @@ function calc_body_size(pins_lists) {
 /*!
  * Generate text description for body (text and lines)
  */
-function generate_body(fname, body_size) {
+function generate_body(fname, body_size, pins_lists) {
     text = "";
     rec_start = 0
     rec_end = 0
@@ -239,16 +239,24 @@ function generate_body(fname, body_size) {
             text += `(text "Цепь" (at ${body_size["left_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
             rec_start = -num_part_length
             rec_end = body_size["left_width"]
-            
-        } else {
+        } else if(body_size["right_width"] != 0) {
             text += `(text "Цепь" (at -${body_size["right_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
             rec_start = -body_size["right_width"]
             rec_end = num_part_length
+        } else {
+            y_body_top = 0;
+            if(pins_lists["rside_pins"].length != 0) {
+                rec_start = 0;
+                rec_end = num_part_length
+            } else {
+                rec_start = -num_part_length
+                rec_end = 0;
+            }
         }
     }
     text += `(polyline (pts (xy 0 ${y_body_top}) (xy 0 -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
 
-    text += `(rectangle (start ${rec_start} ${y_body_top}) (end ${rec_end} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type background)))\r\n`;
+    text += `(rectangle (start ${rec_start} ${y_body_top}) (end ${rec_end} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
     
     for(i=0; i<body_size["body_length"]; i+= grid_aligm(font_size*2)) {
         text += `(polyline (pts (xy ${rec_start} -${i}) (xy ${rec_end} -${i})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
@@ -276,7 +284,7 @@ function pins_placer(pins_lists, body_size) {
                 (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                 (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
         text += `(text "${item["index"]}" (at ${x_pos-pin_length-num_part_length/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        if(item["label"].lengt != 0)
+        if(item["label"].length != 0)
             text += `(text "${parse_pin_label(item["label"])}" (at ${x_pos-pin_length-num_part_length - body_size["right_width"]/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
         y_pos += grid_aligm(font_size);        
     });
@@ -292,7 +300,7 @@ function pins_placer(pins_lists, body_size) {
                 (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                 (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
         text += `(text "${item["index"]}" (at -${x_pos-pin_length-num_part_length/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        if(item["label"].lengt != 0)
+        if(item["label"].length != 0)
             text += `(text "${parse_pin_label(item["label"])}" (at -${x_pos-pin_length-num_part_length - body_size["left_width"]/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
         y_pos += grid_aligm(font_size);        
     });
@@ -334,7 +342,7 @@ function process(){
         
         // Plot rectangle with texts
         symbol_text += `(symbol "${symbl_name}_${sub_index}_0"\r\n`
-        symbol_text += generate_body(key, body_sizes);
+        symbol_text += generate_body(key, body_sizes, pins_groups[key]);
         symbol_text += `)\r\n`
         
         // Place pins

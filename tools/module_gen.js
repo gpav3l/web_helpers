@@ -231,7 +231,6 @@ function generate_body(fname, body_size) {
             text += `(text "Цепь" (at ${body_size["left_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
             rec_start = -num_part_length
             rec_end = body_size["left_width"]
-            
         } else {
             text += `(text "Цепь" (at -${body_size["right_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
             rec_start = -body_size["right_width"]
@@ -240,7 +239,7 @@ function generate_body(fname, body_size) {
     }
     text += `(polyline (pts (xy 0 ${y_body_top}) (xy 0 -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
 
-    text += `(rectangle (start ${rec_start} ${y_body_top}) (end ${rec_end} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type background)))\r\n`;
+    text += `(rectangle (start ${rec_start} ${y_body_top}) (end ${rec_end} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
     
     for(i=0; i<body_size["body_length"]; i+= grid_aligm(font_size*2)) {
         text += `(polyline (pts (xy ${rec_start} -${i}) (xy ${rec_end} -${i})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
