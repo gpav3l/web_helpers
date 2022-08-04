@@ -4,7 +4,6 @@ const func_name_regex = new RegExp('^\[\\t\\s\]*(>|<)\[\\t\\s\]*(.*)$');
 const grid = 2.54;
 const font_size = 2;
 const pin_length = 5.08;
-const num_part_length = grid_aligm(font_size*4)
 const pin_types ={"PO": "power_out", "PI":"power_in", "IO": "bidirectional", "I": "input", "O": "output"};
 
 /*!
@@ -186,14 +185,19 @@ function symbol_property_gen() {
  * Based on pins list, calc size of body, placment for vertical lines, and etc.
  */
 function calc_body_size(pins_lists) {
-    ret_dic = {"body_length": 0, "left_width": 0, "right_width": 0};
+    ret_dic = {"body_length": 0, "left_width": 0, "right_width": 0, "num_part_length": grid_aligm(font_size*4)};
     min_width = grid_aligm(font_size * 10)
     
     // Right side pins
     body_length = 0;
     pins_lists["rside_pins"].forEach(function(item) {
-        if(pin_label_length(item["label"]) > ret_dic["right_width"]) ret_dic["right_width"] = grid_aligm(pin_label_length(item["label"]));
+        if(pin_label_length(item["label"]) > ret_dic["right_width"]) 
+            ret_dic["right_width"] = grid_aligm(pin_label_length(item["label"]));
+        if(pin_label_length(item["index"]) > ret_dic["num_part_length"])
+            ret_dic["num_part_length"] = pin_label_length(item["index"])
+            
         body_length += grid_aligm(font_size)*2.0;
+        
     });
     if((ret_dic["right_width"] != 0) && (ret_dic["right_width"] < min_width))
         ret_dic["right_width"] = min_width
@@ -203,7 +207,11 @@ function calc_body_size(pins_lists) {
     // Left side pins
     body_length = 0;
     pins_lists["lside_pins"].forEach(function(item) {
-        if(pin_label_length(item["label"]) > ret_dic["left_width"]) ret_dic["left_width"] = grid_aligm(pin_label_length(item["label"]));
+        if(pin_label_length(item["label"]) > ret_dic["left_width"]) 
+            ret_dic["left_width"] = grid_aligm(pin_label_length(item["label"]));
+        if(pin_label_length(item["index"]) > ret_dic["num_part_length"])
+            ret_dic["num_part_length"] = pin_label_length(item["index"])
+            
         body_length += grid_aligm(font_size)*2.0; 
     });
     if((ret_dic["left_width"] != 0) && (ret_dic["left_width"] < min_width))
@@ -229,27 +237,27 @@ function generate_body(fname, body_size, pins_lists) {
         text += `(text "Цепь" (at -${body_size["left_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
         text += `(text "Цепь" (at ${body_size["right_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
         
-        rec_start = -(body_size["left_width"] + num_part_length)
-        rec_end = body_size["right_width"]  + num_part_length
+        rec_start = -(body_size["left_width"] + body_size["num_part_length"])
+        rec_end = body_size["right_width"]  + body_size["num_part_length"]
         text += `(polyline (pts (xy -${body_size["left_width"]} ${y_body_top}) (xy -${body_size["left_width"]} -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
         text += `(polyline (pts (xy ${body_size["right_width"]} ${y_body_top}) (xy ${body_size["right_width"]} -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
     
     } else {
         if(body_size["left_width"] != 0) {
             text += `(text "Цепь" (at ${body_size["left_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-            rec_start = -num_part_length
+            rec_start = -body_size["num_part_length"]
             rec_end = body_size["left_width"]
         } else if(body_size["right_width"] != 0) {
             text += `(text "Цепь" (at -${body_size["right_width"]/2.0} ${y_body_top/2.0} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
             rec_start = -body_size["right_width"]
-            rec_end = num_part_length
+            rec_end = body_size["num_part_length"]
         } else {
             y_body_top = 0;
             if(pins_lists["rside_pins"].length != 0) {
                 rec_start = 0;
-                rec_end = num_part_length
+                rec_end = body_size["num_part_length"]
             } else {
-                rec_start = -num_part_length
+                rec_start = -body_size["num_part_length"]
                 rec_end = 0;
             }
         }
@@ -275,34 +283,34 @@ function pins_placer(pins_lists, body_size) {
     
     // Right side pins
     y_pos = 0;
-    x_pos = body_size["right_width"] + num_part_length + pin_length;
+    x_pos = body_size["right_width"] + body_size["num_part_length"];
     if(body_size["left_width"] == 0)
-        x_pos = num_part_length + pin_length        
+        x_pos = body_size["num_part_length"]        
     pins_lists["rside_pins"].forEach(function(item) {
-        y_pos += grid_aligm(font_size);
-        text += `(pin ${item["type"]} line (at ${x_pos} -${y_pos} 180) (length ${pin_length}) 
+        y_pos -= grid_aligm(font_size);
+        text += `(pin ${item["type"]} line (at ${x_pos + pin_length} ${y_pos} 180) (length ${pin_length}) 
                 (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                 (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
-        text += `(text "${item["index"]}" (at ${x_pos-pin_length-num_part_length/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
+        text += `(text "${item["index"]}" (at ${x_pos - body_size["num_part_length"]/2.0} ${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
         if(item["label"].length != 0)
-            text += `(text "${parse_pin_label(item["label"])}" (at ${x_pos-pin_length-num_part_length - body_size["right_width"]/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        y_pos += grid_aligm(font_size);        
+            text += `(text "${parse_pin_label(item["label"])}" (at ${x_pos - body_size["num_part_length"] - body_size["right_width"]/2.0} ${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
+        y_pos -= grid_aligm(font_size);        
     });
     
     // Left side pins
     y_pos = 0;
-    x_pos = (body_size["left_width"] + num_part_length + pin_length);
+    x_pos = -(body_size["left_width"] + body_size["num_part_length"]);
     if(body_size["right_width"] == 0)
-        x_pos = (num_part_length + pin_length); 
+        x_pos = -(body_size["num_part_length"]); 
     pins_lists["lside_pins"].forEach(function(item) {
-        y_pos += grid_aligm(font_size);
-        text += `(pin ${item["type"]} line (at -${x_pos} -${y_pos} 0) (length ${pin_length}) 
+        y_pos -= grid_aligm(font_size);
+        text += `(pin ${item["type"]} line (at ${x_pos - pin_length} ${y_pos} 0) (length ${pin_length}) 
                 (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                 (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
-        text += `(text "${item["index"]}" (at -${x_pos-pin_length-num_part_length/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
+        text += `(text "${item["index"]}" (at ${x_pos + body_size["num_part_length"]/2.0} ${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
         if(item["label"].length != 0)
-            text += `(text "${parse_pin_label(item["label"])}" (at -${x_pos-pin_length-num_part_length - body_size["left_width"]/2.0} -${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
-        y_pos += grid_aligm(font_size);        
+            text += `(text "${parse_pin_label(item["label"])}" (at ${x_pos + body_size["num_part_length"] + body_size["left_width"]/2.0} ${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
+        y_pos -= grid_aligm(font_size);        
     });
     
     return text; 
