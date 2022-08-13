@@ -143,12 +143,16 @@ function is_id_duplicate(pins_list) {
 	id_dict = {};
     for (const [key, value] of Object.entries(pins_groups)) {
         pins_groups[key]["rside_pins"].forEach(function(item) {
- 			if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
- 			else result = item["index"];
+            if(item["index"] != "---") {
+                if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
+                else result = item["index"];
+            }
  		});
         pins_groups[key]["lside_pins"].forEach(function(item) {
- 			if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
- 			else result = item["index"];
+ 			if(item["index"] != "---") {
+                if(id_dict[item["index"]] === undefined) id_dict[item["index"]]= "1";
+                else result = item["index"];
+            }
  		});
     }
 
