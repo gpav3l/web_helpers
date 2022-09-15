@@ -232,7 +232,7 @@ function generate_body(fname, symbl_type, body_size) {
     // Body
     rec_start = line_x_pos + body_size["left_width"]
     rec_end = line_x_pos + body_size["right_width"]
-    text += `(rectangle (start -${rec_start} 0) (end ${rec_end} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type background)))\r\n`;
+    text += `(rectangle (start -${grid_aligm(rec_start)} 0) (end ${grid_aligm(rec_end)} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type background)))\r\n`;
     
     // Symbl type
     text += `(text ${symbl_type} (at 0 -${grid_aligm(font_size)} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
@@ -277,7 +277,7 @@ function pins_placer(pins_lists, body_size) {
             y_pos += grid_aligm(font_size)/2.0;
         } else {
             y_pos += grid_aligm(font_size);
-            text += `(pin ${item["type"]} line (at -${line_x_start + pin_length} -${y_pos} 0) (length ${pin_length}) 
+            text += `(pin ${item["type"]} line (at -${grid_aligm(line_x_start + pin_length)} -${y_pos} 0) (length ${pin_length}) 
                     (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                     (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
             y_pos += grid_aligm(font_size);        

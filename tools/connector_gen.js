@@ -264,10 +264,10 @@ function generate_body(fname, body_size, pins_lists) {
     }
     text += `(polyline (pts (xy 0 ${y_body_top}) (xy 0 -${body_size["body_length"]})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
 
-    text += `(rectangle (start ${rec_start} ${y_body_top}) (end ${rec_end} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
+    text += `(rectangle (start ${grid_aligm(rec_start)} ${y_body_top}) (end ${grid_aligm(rec_end)} -${body_size["body_length"]}) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
     
     for(i=0; i<body_size["body_length"]; i+= grid_aligm(font_size*2)) {
-        text += `(polyline (pts (xy ${rec_start} -${i}) (xy ${rec_end} -${i})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
+        text += `(polyline (pts (xy ${grid_aligm(rec_start)} -${i}) (xy ${grid_aligm(rec_end)} -${i})) (stroke (width 0) (type default) (color 0 0 0 0)) (fill (type none)))\r\n`;
     }
     text += `(text "${fname}" (at 0 -${body_size["body_length"]+font_size} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
     
@@ -288,7 +288,7 @@ function pins_placer(pins_lists, body_size) {
         x_pos = body_size["num_part_length"]        
     pins_lists["rside_pins"].forEach(function(item) {
         y_pos -= grid_aligm(font_size);
-        text += `(pin ${item["type"]} line (at ${x_pos + pin_length} ${y_pos} 180) (length ${pin_length}) 
+        text += `(pin ${item["type"]} line (at ${grid_aligm(x_pos + pin_length)} ${y_pos} 180) (length ${pin_length}) 
                 (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                 (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
         text += `(text "${item["index"]}" (at ${x_pos - body_size["num_part_length"]/2.0} ${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
@@ -304,7 +304,7 @@ function pins_placer(pins_lists, body_size) {
         x_pos = -(body_size["num_part_length"]); 
     pins_lists["lside_pins"].forEach(function(item) {
         y_pos -= grid_aligm(font_size);
-        text += `(pin ${item["type"]} line (at ${x_pos - pin_length} ${y_pos} 0) (length ${pin_length}) 
+        text += `(pin ${item["type"]} line (at ${grid_aligm(x_pos - pin_length)} ${y_pos} 0) (length ${pin_length}) 
                 (name "${parse_pin_label(item["label"])}" (effects (font (size ${font_size} ${font_size})))) 
                 (number "${item["index"]}" (effects (font (size ${font_size} ${font_size})))))\r\n`
         text += `(text "${item["index"]}" (at ${x_pos + body_size["num_part_length"]/2.0} ${y_pos} 0)(effects (font (size ${font_size} ${font_size}))))\r\n`
