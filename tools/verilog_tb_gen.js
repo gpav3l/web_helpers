@@ -1,6 +1,6 @@
 const module_name_regex = /\s*module\s+(\w+)(\(|#|\s)/gm;
 const param_regex = /parameter\s+(\w+\s+)?(\w+)\s*=\s*(\W?\w+\W?)(\s*,|\s*\)|\s*$)/gm;
-const pin_regex = /\s*(input|output)\s+(\[.*\])?\s*(.*),$/gm;
+const pin_regex = /\s*(input|output)\s+(\[.*\])?\s*(\w+)(\s*,|\s*\)|\s*$)/gm;
 
 /*!
  *  Call when page is load, can be use to generate description, additional init and etc.
