@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <link href="../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../css/sidebars.css" rel="stylesheet">
+    <link href="../css/custom.css" rel="stylesheet">
+    <link href="../css/icons.css" rel="stylesheet">
+    
+    <title>KiCAD helper</title>
+    
+    <script src="../js/page_gen_parts.js"></script>
+	<script src="../js/open_file.js"></script>
+	
+	<!-- Description and process js for selected tools --> 
+	<script src="../tools/verilog_tb_gen.js"></script>
+    <script> window.onload = function() {
+        // Generate sidebar navigation
+        gen_page_content();
+        // Tips and description
+        onload_handler();
+    };
+    </script>
+</head>
+
+<body>
+  <div class="py-5">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-md-2">
+            <div class="card">
+                <div class="card-header"><h4>Tools select</h4></div>
+                <div class="card-body"><ul id="page_list" class="nav nav-pills flex-column mb-auto"></ul></div>
+            </div>
+        </div>
+        <div class="col-md-10">
+          <div class="row">
+            <div class="col-sm-10">
+              <div class="card">
+                <div class="card-header">
+                  <p id="page_header"></p>
+                </div>
+                <div class="card-body">
+                  <p id="description"></p>
+                </div>
+
+                <div class="list-group">
+                    <!--<list>
+                    <ul><input id="is_gnd_concate" type="checkbox"> Show only one GND pins (hide other)</ul>
+                    </list>-->
+                </div>
+                <div class="card-body">
+                  <textarea class="data_input" id="pin_list" rows="40" cols="80">
+module sens_wrapper #( parameter CLK_FREQ_HZ=100_000_000,
+parameter CLK2_FREQ_HZ=100_000_000,
+parameter OPTION = "String"
+) (
+  input       CLK,
+  input       N_RST,
+  output      IRQ,
+
+  // Sensors input, MSB - channel B, LSB - Channel A
+  input [1:0] SENS1_CH,
+  input [1:0] SENS2_CH,
+  input [1:0] SENS3_CH,
+
+  // Configs  and status
+  input [31:0]  ACC_TIME, // Time for accumulation in ms
+  output [31:0] STATUS,
+
+  // Fifo outputs
+  output [31:0] FIFO_DI,
+  output        FIFO_WR,
+  output        FIFO_CLK,
+  input         FIFO_FULL
+);
+
+
+                  </textarea>
+                </div>
+              </div>
+            </div>
+            
+             <!-- Right sidebar -->
+
+            
+          </div>
+        </div>
+      </div>
+    </div>
+    <nav class="navbar fixed-bottom navbar-light">
+      <div class="container-fluid">
+        <ul class="nav nav-pills">
+          <li class="nav-item"> <button class="active nav-link" onclick="openFile(dispFile)">Load</button> </li>
+          <li class="nav-item"> <a class="nav-link mx-4 border border-primary bg-primary text-light" href="#popup_result" onclick="process()" >Generate </a></li>
+        </ul>
+      </div>
+    </nav>
+    <div id="popup_result" class="overlay">
+      <div class="popup">
+        <a class="save" href="#" onclick="save_file()"><span id="file_name" class="glyphicon glyphicon-save-file"></span></a>
+        <a class="close" href="#"><span class="glyphicon glyphicon-remove-circle"></span></a>
+        <div style="height: 100%" class="content">
+          <textarea class="gen_result" id="output" readonly=""></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="../js/jquery-1.11.3.min.js"></script>
+  <script src="../js/bootstrap.bundle.min.js"></script>
+
+</body>
+
+</html>

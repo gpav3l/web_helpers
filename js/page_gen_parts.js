@@ -11,6 +11,7 @@ function gen_page_list() {
 	arr.push({name: "Connector", address: "pages/connector_gen.html"});
 	arr.push({name: "Module", address: "pages/module_gen.html"});
 	arr.push({name: "IC", address: "pages/ic_gen.html"});
+	arr.push({name: "Verilog TB", address: "pages/verilog_tb_gen.html"});
 	
 	var href_parts = window.location.href.split("/")
 	href_parts.pop() // Remove .html
